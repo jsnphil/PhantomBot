@@ -169,6 +169,7 @@ $.lang.register('ytplayer.command.edit.usage', 'Usage: !edit [YouTube ID | YouTu
 $.lang.register('ytplayer.command.edit.success', 'Your request has been changed to "$1"');
 $.lang.register('ytplayer.command.edit.404', 'You do not have a song in the queue');
 $.lang.register('ytplayer.command.edit.closed', 'Requests are closed and your request could not be changed');
+$.lang.register('ytplayer.command.edit.mod.usage', 'Usage: !edit user [username] [YouTube ID | YouTube link | search string]');
 
 $.lang.register('ytplayer.command.bump.usage', 'Usage: !bump [user] [position] [allow]');
 $.lang.register('ytplayer.command.bump.success', 'Your song has been bumped to the top of the queue.');

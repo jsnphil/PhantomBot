@@ -2461,6 +2461,11 @@
             $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.queue.size', currentPlaylist.getRequestsCount()));
         }
 
+        /**
+         * Edit command
+         * !edit <song>
+         * !edit user <username> <song>
+         */
         if (command.equalsIgnoreCase('edit')) {
             if (!songRequestsEnabled) {
                 $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.edit.closed'));
@@ -2472,8 +2477,20 @@
                 return;
             }
 
-            var requestsList = currentPlaylist.getRequestList();
+            var user, newSong;
+            if (args[0].equalsIgnoreCase('user')) {
+                if (!(args[1] && args[2])) {
+                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.edit.mod.usage'));
+                    return;
+                }
 
+                user = args[1];
+                newSong = args[2];
+            } else {
+                user = sender;
+            }
+
+            var requestsList = currentPlaylist.getRequestList();
             if (requestsList.length == 0) {
                 $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.queue.empty'));
                 return;
@@ -2484,21 +2501,21 @@
             for (i = 0; i < requestsList.length; i++) {
                 existingRequest = requestsList[i];
 
-                if (existingRequest.getOwner() == sender) {
+                if (existingRequest.getOwner() == user) {
                     requestFound = true;
                     break;
                 }
             }
 
             if (!requestFound) {
-                $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.position.none'));
+                $.say($.whisperPrefix(user) + $.lang.get('ytplayer.command.position.none'));
                 return;
             }
 
             // Find the new song
             var newRequest;
             try {
-                newRequest = new YoutubeVideo(args[0], sender);
+                newRequest = new YoutubeVideo(newSong, user);
             } catch (ex) {
                 requestFailReason = $.lang.get('ytplayer.requestsong.error.yterror', ex);
                 $.log.error("YoutubeVideo::exception: " + ex);
@@ -2507,7 +2524,7 @@
 
             // Make sure new request follows rules
             if (currentPlaylist.videoExistsInRequests(newRequest)) {
-                $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.requestsong.error.exists'));
+                $.say($.whisperPrefix(user) + $.lang.get('ytplayer.requestsong.error.exists'));
                 return;
             }
 
@@ -2520,7 +2537,7 @@
                 }
                 requestFailReason = $.lang.get('ytplayer.requestsong.error.maxlength', newRequest.getVideoLengthMMSS(), minutes + ":" + seconds);
 
-                $.say($.whisperPrefix(sender) + requestFailReason);
+                $.say($.whisperPrefix(user) + requestFailReason);
                 return;
             }
 
@@ -2529,15 +2546,15 @@
                 if (newRequest.getVideoTitle().toLowerCase().includes(keys[i])) {
                     requestFailReason = $.lang.get('ytplayer.blacklist.404');
 
-                    $.say($.whisperPrefix(sender) + requestFailReason);
+                    $.say($.whisperPrefix(user) + requestFailReason);
                     return;
                 }
             }
 
-            currentPlaylist.removeUserSong(sender);
+            currentPlaylist.removeUserSong(user);
             currentPlaylist.addToQueue(newRequest, i);
             connectedPlayerClient.pushSongList();
-            $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.edit.success', newRequest.getVideoTitle()));
+            $.say($.whisperPrefix(user) + $.lang.get('ytplayer.command.edit.success', newRequest.getVideoTitle()));
         }
 
         if (command.equalsIgnoreCase('promote')) {
@@ -2816,6 +2833,8 @@
         $.registerChatCommand('./systems/youtubePlayer.js', "position");
         $.registerChatCommand('./systems/youtubePlayer.js', "queuesize");
         $.registerChatCommand('./systems/youtubePlayer.js', "edit");
+        $.registerChatSubcommand('edit', 'user', 2);
+
         $.registerChatCommand('./systems/youtubePlayer.js', "promote", 2);
         $.registerChatCommand('./systems/youtubePlayer.js', "move", 2);
         $.registerChatCommand('./systems/youtubePlayer.js', "bumplimit", 2);
