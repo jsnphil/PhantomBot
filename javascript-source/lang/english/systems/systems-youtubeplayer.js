@@ -144,7 +144,6 @@ $.lang.register('ytplayer.command.votecount.usage', '!ytp votecount [amount]  --
 // Custom
 $.lang.register('ytplayer.requestsong.error.maximum.total.requests', 'Only $1 songs can be requested per stream per user');
 $.lang.register('ytplayer.command.songcount', 'Kent has played $1 songs');
-$.lang.register('ytplayer.command.requestcount', '$1 has had $2 request(s) played');
 $.lang.register('ytplayer.command.queuelimit.usage', 'Usage: !queuelimit [off | max requests]');
 $.lang.register('ytplayer.command.queuelimit.success', 'Maximum number of requests in the queue set to $1');
 $.lang.register('ytplayer.command.queuelimit.success.off', 'Queue limit has been turned off');
@@ -189,4 +188,33 @@ $.lang.register('ytplayer.startstream.requests.open', 'Request queue is open');
 $.lang.register('ytplayer.startstream.clearhistory', 'Clearing song history');
 $.lang.register('ytplayer.startstream.clearbumps', 'Resetting user bumps');
 $.lang.register('ytplayer.startstream.shuffle.off', 'Setting the play mode to sequential');
+
+/* Shuffle System */
+$.lang.register('shufflesystem.open.error.opened', 'A shuffle is currently in progress.');
+$.lang.register('shufflesystem.open.usage', 'Usage: !shuffle open [keyword] [close timer minutes]. [keyword] required.');
+$.lang.register('shufflesystem.open', 'A shuffle is now opened! Type $1 to enter$2! $3');
+$.lang.register('shufflesystem.close.error.closed', 'There is no shuffle in progress.');
+$.lang.register('shufflesystem.close.success', 'The shuffle is now closed! No more entries will be counted. Use "!shuffle draw" to pick a winner!');
+$.lang.register('shufflesystem.winner', 'The winner of this shuffle is $1!  Your song will be played next! $2');
+$.lang.register('shufflesystem.repick.error', 'There are no more users in the shuffle list.');
+$.lang.register('shufflesystem.enter.404', 'You already entered this shuffle.');
+$.lang.register('shufflesystem.usage', 'Usage: !shuffle [open / close / draw / results / subscriberbonus/ regularbonus / whisperwinner]');
+$.lang.register('shufflesystem.results', 'A shuffle is still open! Keyword: $1 - Total entries: $2');
+$.lang.register('shufflesystem.shuffle.repick.toggle1', 'Shuffle winners will no longer be repicked.');
+$.lang.register('shufflesystem.shuffle.repick.toggle2', 'Shuffle winners will now be able to get repicked.');
+$.lang.register('shufflesystem.message.usage', 'Usage: !shuffle message [message]');
+$.lang.register('shufflesystem.message.set', 'Shuffle message has been set to: "$1".');
+$.lang.register('shufflesystem.timer.usage', 'Usage: !Shuffle messagetimer [minutes]');
+$.lang.register('shufflesystem.timer.set', 'Shuffle message timer has been set to $1 minutes.');
+$.lang.register('shufflesystem.common.timer', 'The shuffle will close in $1 minutes.');
+$.lang.register('shufflesystem.common.message', 'no longer');
+$.lang.register('shufflesystem.open.keyword-exists', 'Keyword cannot be an existing command: $1');
+$.lang.register('shufflesystem.winner.404', 'Could not pick a winner. No one entered this shuffle.');
+$.lang.register('shufflesystem.reset', 'The shuffle has been reset.');
+$.lang.register('shufflesystem.enter.success', 'You have been entered in the shuffle.');
+$.lang.register('shufflesystem.error.recentwinner', 'You cannot enter a shuffle within two songs of your last win');
+$.lang.register('shufflesystem.error.norequest', 'You do not have a request in the queue');
+$.lang.register('shufflesystem.user.wins', 'You have won shuffle $1 times');
+
+$.lang.register('ytplayer.discord.save', '$1, requested by $2 $3');
 

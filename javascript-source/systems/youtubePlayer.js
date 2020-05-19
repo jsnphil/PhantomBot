@@ -56,7 +56,19 @@
             /* @type {PlayerClientInterface} */
             connectedPlayerClient = null,
             /* @type {BotPlayList} */
-            currentPlaylist = null;
+            currentPlaylist = null,
+            // Shuffle variables
+            entries = [],
+            entered = [],
+            keyword = '',
+            timerTime = 0,
+            status = false,
+            sendMessages = $.getSetIniDbBoolean('shuffleSettings', 'raffleMSGToggle', false),
+            allowRepick = $.getSetIniDbBoolean('shuffleSettings', 'noRepickSame', true),
+            raffleMessage = $.getSetIniDbString('shuffleSettings', 'raffleMessage', 'A raffle is still opened! Type (keyword) to enter. (entries) users have entered so far.'),
+            messageInterval = $.getSetIniDbNumber('shuffleSettings', 'raffleMessageInterval', 0),
+            interval, timeout, followMessage = '',
+            timerMessage = '';
 
     /**
      * @function reloadyt
@@ -846,7 +858,6 @@
          * @return {YoutubeVideo}
          */
         this.requestSong = function (searchQuery, requestOwner) {
-            var keys = $.inidb.GetKeyList('ytpBlacklistedSong', '');
             if (!$.isAdmin(requestOwner) && !$.isMod(requestOwner) && (!songRequestsEnabled || this.senderReachedRequestMax(requestOwner) || this.senderReachedTotalRequestsMax(requestOwner))) {
                 if (this.senderReachedRequestMax(requestOwner)) {
                     // User already has max allowed in the queue
@@ -869,31 +880,12 @@
                 return null;
             }
 
-            if (this.videoExistsInRequests(youtubeVideo)) {
-                requestFailReason = $.lang.get('ytplayer.requestsong.error.exists');
-                return null;
+            var requestAllowed = isRequestAllowed(requestOwner, youtubeVideo);
+
+            if (requestAllowed) {
+                requests.add(youtubeVideo);
+                return youtubeVideo;
             }
-
-            if (this.videoLengthExceedsMax(youtubeVideo) && !$.isAdmin(requestOwner)) {
-                var minutes = Math.floor(songRequestsMaxSecondsforVideo / 60);
-                var seconds = songRequestsMaxSecondsforVideo - minutes * 60;
-
-                if (seconds === 0) {
-                    seconds = "00";
-                }
-                requestFailReason = $.lang.get('ytplayer.requestsong.error.maxlength', youtubeVideo.getVideoLengthMMSS(), minutes + ":" + seconds);
-                return null;
-            }
-
-            for (var i in keys) {
-                if (youtubeVideo.getVideoTitle().toLowerCase().includes(keys[i])) {
-                    requestFailReason = $.lang.get('ytplayer.blacklist.404');
-                    return null;
-                }
-            }
-
-            requests.add(youtubeVideo);
-            return youtubeVideo;
         };
 
         /**
@@ -1268,8 +1260,6 @@
         }
     }
 
-
-
     /**
      * @event yTPlayerRandomize
      */
@@ -1320,25 +1310,6 @@
         } else {
             refundUser = currentPlaylist.getCurrentVideo().getOwner().toLowerCase();
             retval = currentPlaylist.addToPlaylist(currentPlaylist.getCurrentVideo());
-        }
-
-        if (stealRefund && retval != -2 && refundUser.length > 1) {
-            if (!$.isBot(refundUser) && !playlistDJname.equalsIgnoreCase(refundUser)) {
-                if ($.inidb.exists('pricecom', 'songrequest') || $.inidb.exists('pricecom', 'addsong')) {
-                    var isMod = $.isMod(refundUser);
-                    if ((((isMod && $.getIniDbBoolean('settings', 'pricecomMods', false) && !$.isBot(refundUser)) || !isMod))) {
-                        var refund = $.inidb.get('pricecom', 'songrequest');
-                        if (refund == 0) {
-                            refund = $.inidb.get('pricecom', 'addsong');
-                        }
-                        refund = parseInt(refund / 2);
-                        if (refund > 0) {
-                            $.inidb.incr('points', refundUser, parseInt(refund));
-                            $.say($.lang.get('ytplayer.command.stealsong.refund', $.username.resolve(refundUser), refund, (refund == 1 ? $.pointNameSingle : $.pointNameMultiple)));
-                        }
-                    }
-                }
-            }
         }
     });
 
@@ -1485,6 +1456,7 @@
     $.bind('command', function (event) {
         var command = event.getCommand(),
                 sender = event.getSender().toLowerCase(),
+                arguments = event.getArguments(),
                 args = event.getArgs(),
                 pActions,
                 action,
@@ -1540,38 +1512,6 @@
                 $.inidb.RemoveFile('ytPlaylist_default');
                 createDefaultPl();
                 $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.ytp.resetdefaultlist.success'));
-                return;
-            }
-
-            /**
-             * @commandpath ytp togglecconly - Toggle option to only use Creative Commons licensed songs.
-             */
-            if (action.equalsIgnoreCase('togglecconly')) {
-                if ($.getIniDbBoolean('ytSettings', 'playCCOnly')) {
-                    playCCOnly = false;
-                    $.setIniDbBoolean('ytSettings', 'playCCOnly', false);
-                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.ytp.togglecconly.disable'));
-                } else {
-                    playCCOnly = true;
-                    $.setIniDbBoolean('ytSettings', 'playCCOnly', true);
-                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.ytp.togglecconly.enable'));
-                }
-                return;
-            }
-
-            /**
-             * @commandpath ytp togglestealrefund - Toggle refunding users half their points if their song is stolen, use to reward users with songs that are liked
-             */
-            if (action.equalsIgnoreCase('togglestealrefund')) {
-                if ($.getIniDbBoolean('ytSettings', 'stealRefund')) {
-                    stealRefund = false;
-                    $.setIniDbBoolean('ytSettings', 'stealRefund', false);
-                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.ytp.togglestealrefund.disable'));
-                } else {
-                    stealRefund = true;
-                    $.setIniDbBoolean('ytSettings', 'stealRefund', true);
-                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.ytp.togglestealrefund.enable'));
-                }
                 return;
             }
 
@@ -2148,7 +2088,22 @@
                 return;
             }
 
-            var request = currentPlaylist.requestSong(event.getArguments(), sender);
+            // HERE!!!!
+            var user;
+            if (args[0].equalsIgnoreCase('user')) {
+                if (!(args[1] && args[2])) {
+                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.edit.mod.usage'));
+                    return;
+                }
+
+                user = args[1].toLowerCase();
+                song = args[2];
+            } else {
+                song = args[0];
+                user = sender;
+            }
+
+            var request = currentPlaylist.requestSong(song, user);
             if (request != null) {
                 var i;
                 var queueLengthInSeconds = 0;
@@ -2325,18 +2280,6 @@
         }
 
         /**
-         * @commandpath songcount
-         */
-        if (command.equalsIgnoreCase('requests')) {
-            var count = $.inidb.get("songcounts", sender + "-request-counts");
-
-            if (count === null) {
-                count = 0;
-            }
-            $.say($.lang.get('ytplayer.command.requestcount', sender, count));
-        }
-
-        /**
          * @commandpath queuelimit [off|max concurrent requests] - Set the maximum number of requests a user can
          * have in the queue at one time
          */
@@ -2401,24 +2344,26 @@
             $.say($.lang.get('ytplayer.command.requestlimit.length', minutes + ":" + seconds));
         }
 
-        if (command.equalsIgnoreCase('shuffle')) {
-            if (shuffleQueue) {
-                var requests = currentPlaylist.getRequestList();
-                var numberOfRequests = currentPlaylist.getRequestsCount();
+// Old Shuffle System
 
-                if (numberOfRequests == 0) {
-                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.queue.empty'));
-                }
-
-                var request = getRandomRequest();
-
-                currentPlaylist.removeUserSong(request.getOwner());
-                currentPlaylist.addToQueue(request, 0);
-                connectedPlayerClient.pushSongList();
-            } else {
-                $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.position.shuffle.disabled'));
-            }
-        }
+//        if (command.equalsIgnoreCase('shuffle')) {
+//            if (shuffleQueue) {
+//                var requests = currentPlaylist.getRequestList();
+//                var numberOfRequests = currentPlaylist.getRequestsCount();
+//
+//                if (numberOfRequests == 0) {
+//                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.queue.empty'));
+//                }
+//
+//                var request = getRandomRequest();
+//
+//                currentPlaylist.removeUserSong(request.getOwner());
+//                currentPlaylist.addToQueue(request, 0);
+//                connectedPlayerClient.pushSongList();
+//            } else {
+//                $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.position.shuffle.disabled'));
+//            }
+//        }
 
         if (command.equalsIgnoreCase('position')) {
             if (shuffleQueue) {
@@ -2428,33 +2373,25 @@
 
             var requests = currentPlaylist.getRequestList();
 
-            var message;
             if (requests.length != 0) {
-                var i;
-                var request;
-                var timeToPlayInSeconds = 0;
-                for (i = 0; i < requests.length; i++) {
-                    request = requests[i];
-
-                    if (request.getOwner() == sender) {
-                        var playTime;
-                        if (i == 0) {
-                            playTime = "It's up next!";
-                        } else {
-                            playTime = "There is " + secondsToTimestamp(timeToPlayInSeconds) + " worth of music before your song";
-                        }
-
-                        $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.position.success', (i + 1), playTime));
-                        return;
+                var request = getUserRequest(sender);
+                if (request == null) {
+                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.position.none'));
+                } else {
+                    var i = request[1];
+                    if (i == 0) {
+                        playTime = "It's up next!";
                     } else {
-                        timeToPlayInSeconds = timeToPlayInSeconds + parseInt(request.getVideoLength(), 10);
+                        playTime = "There is " + secondsToTimestamp(request[2]) + " worth of music before your song";
                     }
-                }
 
-                $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.position.none'));
+                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.position.success', (i + 1), playTime));
+                }
             } else {
                 $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.queue.empty'));
             }
+
+            return;
         }
 
         if (command.equalsIgnoreCase('queuesize')) {
@@ -2484,9 +2421,10 @@
                     return;
                 }
 
-                user = args[1];
+                user = args[1].toLowerCase();
                 newSong = args[2];
             } else {
+                newSong = args[0];
                 user = sender;
             }
 
@@ -2496,18 +2434,8 @@
                 return;
             }
 
-            var i, requestFound = false;
-            var existingRequest;
-            for (i = 0; i < requestsList.length; i++) {
-                existingRequest = requestsList[i];
-
-                if (existingRequest.getOwner() == user) {
-                    requestFound = true;
-                    break;
-                }
-            }
-
-            if (!requestFound) {
+            var existingRequest = getUserRequest(user);
+            if (existingRequest == null) {
                 $.say($.whisperPrefix(user) + $.lang.get('ytplayer.command.position.none'));
                 return;
             }
@@ -2522,39 +2450,12 @@
                 return;
             }
 
-            // Make sure new request follows rules
-            if (currentPlaylist.videoExistsInRequests(newRequest)) {
-                $.say($.whisperPrefix(user) + $.lang.get('ytplayer.requestsong.error.exists'));
-                return;
+            if (isRequestAllowed(user, newRequest)) {
+                currentPlaylist.removeUserSong(user);
+                currentPlaylist.addToQueue(newRequest, existingRequest[1]);
+                connectedPlayerClient.pushSongList();
+                $.say($.whisperPrefix(user) + $.lang.get('ytplayer.command.edit.success', newRequest.getVideoTitle()));
             }
-
-            if (currentPlaylist.videoLengthExceedsMax(newRequest)) {
-                var minutes = Math.floor(songRequestsMaxSecondsforVideo / 60);
-                var seconds = songRequestsMaxSecondsforVideo - minutes * 60;
-
-                if (seconds === 0) {
-                    seconds = "00";
-                }
-                requestFailReason = $.lang.get('ytplayer.requestsong.error.maxlength', newRequest.getVideoLengthMMSS(), minutes + ":" + seconds);
-
-                $.say($.whisperPrefix(user) + requestFailReason);
-                return;
-            }
-
-            var keys = $.inidb.GetKeyList('ytpBlacklistedSong', '');
-            for (var i in keys) {
-                if (newRequest.getVideoTitle().toLowerCase().includes(keys[i])) {
-                    requestFailReason = $.lang.get('ytplayer.blacklist.404');
-
-                    $.say($.whisperPrefix(user) + requestFailReason);
-                    return;
-                }
-            }
-
-            currentPlaylist.removeUserSong(user);
-            currentPlaylist.addToQueue(newRequest, i);
-            connectedPlayerClient.pushSongList();
-            $.say($.whisperPrefix(user) + $.lang.get('ytplayer.command.edit.success', newRequest.getVideoTitle()));
         }
 
         if (command.equalsIgnoreCase('promote')) {
@@ -2740,7 +2641,195 @@
             $.say(message);
             return;
         }
+
+        // Shuffle Commands
+        if (command.equalsIgnoreCase('shuffle')) {
+            if (!shuffleQueue) {
+                $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.position.shuffle.disabled'));
+                return;
+            }
+
+            action = args[0];
+
+            if (action === undefined) {
+                $.say($.whisperPrefix(sender) + $.lang.get('shufflesystem.usage'));
+                return;
+            }
+
+            /**
+             * @commandpath shuffle open [entry fee] [keyword] [close timer] [-usepoints / -usetime / -followers] - Opens a custom raffle.
+             */
+            if (action.equalsIgnoreCase('open')) {
+                open(sender, arguments);
+                $.log.event('A shuffle was opened by: ' + sender + '. Arguments (' + args[0] + ')');
+                return;
+            }
+
+            /**
+             * @commandpath shuffle close - Closes the current raffle.
+             */
+            if (action.equalsIgnoreCase('close')) {
+                close(sender);
+                $.log.event('A shuffle was closed by: ' + sender + '.');
+                return;
+            }
+
+            /**
+             * @commandpath shuffle draw - Draws a winner from the current raffle list.
+             */
+            if (action.equalsIgnoreCase('draw')) {
+                draw(sender);
+                return;
+            }
+
+            /**
+             * @commandpath shuffle reset - Resets the shuffle.
+             */
+            if (action.equalsIgnoreCase('reset')) {
+                clear();
+                if (sender != $.botName.toLowerCase()) {
+                    $.say($.whisperPrefix(sender) + $.lang.get('shufflesystem.reset'));
+                }
+                return;
+            }
+
+            /**
+             * @commandpath shuffle results - Give you the current raffle information if there is one active.
+             */
+            if (action.equalsIgnoreCase('results')) {
+                if (status) {
+                    $.say($.lang.get('shufflesystem.results', keyword, Object.keys(entered).length))
+                }
+                return;
+            }
+
+            /**
+             * @commandpath shuffle togglewarningmessages - Toggles the raffle warning messages when entering.
+             */
+            if (action.equalsIgnoreCase('togglewarningmessages')) {
+                sendMessages = !sendMessages;
+                $.inidb.set('shuffleSettings', 'raffleMSGToggle', sendMessages);
+                $.say($.whisperPrefix(sender) + 'Raffle warning messages have been ' + (sendMessages ? $.lang.get('common.enabled') : $.lang.get('common.disabled')) + '.');
+                return;
+            }
+
+            // TODO Change to make it so a winner can't win within 2 songs
+            /**
+             * @commandpath shuffle togglerepicks - Toggles if the same winner can be repicked more than one.
+             */
+            if (action.equalsIgnoreCase('togglerepicks')) {
+                allowRepick = !allowRepick;
+                $.inidb.set('shuffleSettings', 'noRepickSame', allowRepick);
+                $.say($.whisperPrefix(sender) + (allowRepick ? $.lang.get('shufflesystem.raffle.repick.toggle1') : $.lang.get('shufflesystem.raffle.repick.toggle2')));
+                return;
+            }
+
+            /**
+             * @commandpath shuffle message [message] - Sets the raffle auto annouce messages saying that raffle is still active.
+             */
+            if (action.equalsIgnoreCase('message')) {
+                if (subAction === undefined) {
+                    $.say($.whisperPrefix(sender) + $.lang.get('shufflesystem.message.usage'));
+                    return;
+                }
+
+                raffleMessage = arguments.substring(action.length() + 1);
+                $.inidb.set('shuffleSettings', 'raffleMessage', raffleMessage);
+                $.say($.whisperPrefix(sender) + $.lang.get('shufflesystem.message.set', raffleMessage));
+                return;
+            }
+
+            /**
+             * @commandpath shuffle messagetimer [minutes] - Sets the raffle auto annouce messages interval. 0 is disabled.
+             */
+            if (action.equalsIgnoreCase('messagetimer')) {
+                if (subAction === undefined || isNaN(parseInt(subAction))) {
+                    $.say($.whisperPrefix(sender) + $.lang.get('shufflesystem.timer.usage'));
+                    return;
+                }
+
+                messageInterval = parseInt(subAction);
+                $.inidb.set('shuffleSettings', 'raffleMessageInterval', messageInterval);
+                $.say($.whisperPrefix(sender) + $.lang.get('shufflesystem.timer.set', messageInterval));
+                return;
+            }
+        }
+
+        /**
+         * Save command - saves current song to Discord
+         * !save
+         */
+        if (command.equalsIgnoreCase('save')) {
+            $.discord.say(
+                    "#new-music-discovery",
+                    $.lang.get(
+                            'ytplayer.discord.save',
+                            currentPlaylist.getCurrentVideo().getVideoTitle(),
+                            currentPlaylist.getCurrentVideo().getOwner(),
+                            currentPlaylist.getCurrentVideo().getVideoLink()
+                            )
+                    )
+
+            $.say("Saving the request to Discord");
+        }
+
+        if (command.equalsIgnoreCase('shufflewins')) {
+            var wins = $.inidb.get("shufflewins", sender);
+            if (wins == null) {
+                wins = 0;
+            }
+            $.say($.whisperPrefix(sender) + $.lang.get('shufflesystem.user.wins', wins));
+        }
     });
+
+    function isRequestAllowed(user, request) {
+        // Make sure new request follows rules
+        if (currentPlaylist.videoExistsInRequests(request)) {
+            $.say($.whisperPrefix(user) + $.lang.get('ytplayer.requestsong.error.exists'));
+            return false;
+        }
+
+        if (currentPlaylist.videoLengthExceedsMax(request)) {
+            var minutes = Math.floor(songRequestsMaxSecondsforVideo / 60);
+            var seconds = songRequestsMaxSecondsforVideo - minutes * 60;
+
+            if (seconds === 0) {
+                seconds = "00";
+            }
+            requestFailReason = $.lang.get('ytplayer.requestsong.error.maxlength', request.getVideoLengthMMSS(), minutes + ":" + seconds);
+
+            $.say($.whisperPrefix(user) + requestFailReason);
+            return false;
+        }
+
+        var keys = $.inidb.GetKeyList('ytpBlacklistedSong', '');
+        for (var i in keys) {
+            if (request.getVideoTitle().toLowerCase().includes(keys[i])) {
+                requestFailReason = $.lang.get('ytplayer.blacklist.404');
+
+                $.say($.whisperPrefix(user) + requestFailReason);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function getUserRequest(user) {
+        var timeToPlayInSeconds = 0;
+        var request;
+        var requests = currentPlaylist.getRequestList();
+        for (i = 0; i < requests.length; i++) {
+            request = requests[i];
+            if (request.getOwner() == user) {
+                return [request, i, timeToPlayInSeconds];
+            } else {
+                timeToPlayInSeconds = timeToPlayInSeconds + parseInt(request.getVideoLength(), 10);
+            }
+        }
+
+        return null;
+    }
 
     function secondsToTimestamp(timeInSeconds) {
         // multiply by 1000 because Date() requires miliseconds
@@ -2778,7 +2867,6 @@
     }
 
     function getRandomRequest() {
-        var requests = currentPlaylist.getRequestList();
         var numberOfRequests = currentPlaylist.getRequestsCount();
 
         if (numberOfRequests == 0) {
@@ -2802,6 +2890,238 @@
         return request;
     }
 
+    /* New Shuffle System Functions */
+
+    /**
+     * @function reloadRaffle
+     * @info used for the panel.
+     */
+    function reloadShuffle() {
+        sendMessages = $.getIniDbBoolean('shuffleSettings', 'raffleMSGToggle');
+        allowRepick = $.getIniDbBoolean('shuffleSettings', 'noRepickSame');
+        raffleMessage = $.getIniDbString('shuffleSettings', 'raffleMessage');
+        messageInterval = $.getIniDbNumber('shuffleSettings', 'raffleMessageInterval');
+    }
+    /**
+     * @function open
+     * @info opens a raffle
+     *
+     * @param {string} username
+     * @param {arguments} arguments
+     */
+    function open(username, arguments) {
+        var args,
+                i = 1;
+
+        /* Check if there's a raffle already opened */
+        if (status) {
+            $.say($.whisperPrefix(username) + $.lang.get('shufflesystem.open.error.opened'));
+            return;
+        }
+
+        clear();
+
+        /* Now split the arguments string up as we could have removed some items. */
+        args = arguments.split(' ');
+
+        /* Check for the keyword */
+        if (args[i] !== undefined) {
+            keyword = args[i].toLowerCase();
+            i++;
+
+            if (keyword.startsWith('!')) {
+                keyword = ('!' + keyword.match(/(!+)(.+)/)[2]);
+            }
+
+            /* Ensure that keyword is not already a registered command. */
+            if (keyword.startsWith('!') && $.commandExists(keyword.substring(1))) {
+                $.say($.whisperPrefix(username) + $.lang.get('shufflesystem.open.keyword-exists', keyword));
+                return;
+            }
+        } else {
+            $.say($.whisperPrefix(username) + $.lang.get('shufflesystem.open.usage'));
+            return;
+        }
+
+        // TODO Default to 1 minute timer
+        /* Check if the caster wants a auto close timer */
+        if (!isNaN(parseInt(args[i])) && parseInt(args[i]) !== 0) {
+            timerTime = parseInt(args[i]);
+            timeout = setTimeout(function () {
+                close();
+            }, (timerTime * 6e4));
+            timerMessage = $.lang.get('shufflesystem.common.timer', timerTime);
+        }
+
+        /* Say in chat that the raffle is now opened. */
+        $.say($.lang.get('shufflesystem.open', keyword, followMessage, timerMessage));
+
+        if (parseInt(messageInterval) !== 0) {
+            interval = setInterval(function () {
+                $.say(raffleMessage.replace('(keyword)', keyword).replace('(entries)', String(Object.keys(entered).length)));
+            }, messageInterval * 6e4);
+        }
+
+        /* Clear the old shuffle raffle data */
+        entries = [];
+        $.shuffleCommand = keyword;
+        $.inidb.RemoveFile('shuffleList');
+        $.inidb.set('shuffleresults', 'shuffleEntries', 0);
+        // Mark the raffle as on for the panel.
+        $.inidb.set('shuffleSettings', 'isActive', 'true');
+
+        /* Mark the shuffle raffle as opened */
+        status = true;
+    }
+
+    /**
+     * @function close
+     * @info closes the raffle
+     *
+     * @param {string} username
+     */
+    function close(username) {
+        /* Clear the timer if there is one active. */
+        clearInterval(timeout);
+        clearInterval(interval);
+
+        /* Check if there's a raffle opened */
+        if (!status) {
+            $.say($.whisperPrefix(username) + $.lang.get('shufflesystem.close.error.closed'));
+            return;
+        }
+
+        status = false;
+
+        $.say($.lang.get('shufflesystem.close.success'));
+
+        // Mark the raffle as off for the panel.
+        $.inidb.set('shuffleSettings', 'isActive', 'false');
+    }
+
+    /**
+     * @function winner
+     * @info chooses a winner for the raffle
+     */
+    function draw(sender) {
+        /* Check if anyone entered the raffle */
+        if (entries.length === 0) {
+            $.say($.lang.get('shufflesystem.winner.404'));
+            return;
+        }
+
+        var username = $.randElement(entries);
+
+        $.inidb.incr("shufflewins", username, 1);
+        var wins = $.inidb.get("shufflewins", username);
+        var winMsg;
+        if (wins == 1) {
+            winMsg = "This is their first win in shuffle!";
+        } else {
+            winMsg = "They have won shuffle " + wins + " times!";
+        }
+
+        $.say($.lang.get('shufflesystem.winner', username, winMsg));
+
+        var request = getUserRequest(username);
+
+        // Bump users song in the queue
+        currentPlaylist.removeUserSong(username);
+        currentPlaylist.addToQueue(request[0], 0);
+        connectedPlayerClient.pushSongList();
+    }
+
+    /**
+     * @function message
+     * @info messages that user if the raffle toggles are on
+     *
+     * @param {string} username
+     * @param {string} message
+     */
+    function message(username, message) {
+        $.say($.whisperPrefix(username) + message);
+    }
+
+    /**
+     * @function enter
+     * @info enters the user into the raffle
+     *
+     * @param {string} username
+     */
+    function enter(username, tags) {
+        /* Check if the user already entered the raffle */
+        if (entered[username] !== undefined) {
+            message(username, $.lang.get('shufflesystem.enter.404'));
+            return;
+        }
+
+        /* Check if the user has a song in the queue */
+        var request = getUserRequest(username);
+        if (request == null) {
+            message(username, $.lang.get('shufflesystem.error.norequest'));
+            return;
+        }
+
+        /* Check if the user is one of the last 2 winners */
+        var recentUsers = currentPlaylist.getPreviousRequesters();
+        $.say("Recent users: " + recentUsers);
+        var history = recentUsers.toArray();
+        for (i = 0; i < history.length; i++) {
+            if (username.equalsIgnoreCase(history[i])) {
+                message(username, $.lang.get('shufflesystem.error.recentwinner'));
+                return;
+            }
+        }
+
+        /* Push the user into the array */
+        entered[username] = true;
+        entries.push(username);
+
+        message(username, $.lang.get('shufflesystem.enter.success'));
+
+//        /* Push the panel stats */
+//        if ($.bot.isModuleEnabled('./handlers/panelHandler.js')) {
+//            $.inidb.setAutoCommit(false);
+//            $.inidb.set('raffleList', username, true);
+//            $.inidb.set('raffleresults', 'raffleEntries', Object.keys(entered).length);
+//            $.inidb.setAutoCommit(true);
+//        }
+    }
+
+    /**
+     * @function clear
+     * @info resets the raffle information
+     */
+    function clear() {
+        /* Clear the timer if there is one active. */
+        clearInterval(timeout);
+        clearInterval(interval);
+        keyword = '';
+        followMessage = '';
+        timerMessage = '';
+        status = false;
+        entryFee = 0;
+        timerTime = 0;
+        entered = [];
+        entries = [];
+        $.shuffleCommand = null;
+        $.inidb.RemoveFile('shuffleList');
+        $.inidb.set('shuffleresults', 'shuffleEntries', 0);
+        // Mark the raffle as off for the panel.
+        $.inidb.set('shuffleSettings', 'isActive', 'false');
+    }
+
+    /**
+     * @event ircChannelMessage
+     */
+    $.bind('ircChannelMessage', function (event) {
+        if (status === true && event.getMessage().equalsIgnoreCase(keyword)) {
+            enter(event.getSender(), event.getTags());
+        }
+    });
+
+    /* --- */
+
     $.bind('initReady', function () {
         $.registerChatCommand('./systems/youtubePlayer.js', 'ytp', 2);
         $.registerChatCommand('./systems/youtubePlayer.js', 'musicplayer', 2);
@@ -2813,6 +3133,8 @@
         $.registerChatCommand('./systems/youtubePlayer.js', 'skipsong', 1);
         $.registerChatCommand('./systems/youtubePlayer.js', 'reloadyt', 1);
         $.registerChatCommand('./systems/youtubePlayer.js', 'songrequest');
+        $.registerChatSubcommand('songrequest', 'user', 2);
+
         $.registerChatCommand('./systems/youtubePlayer.js', 'addsong');
         $.registerChatCommand('./systems/youtubePlayer.js', 'previoussong');
         $.registerChatCommand('./systems/youtubePlayer.js', 'currentsong');
@@ -2829,11 +3151,13 @@
         $.registerChatCommand('./systems/youtubePlayer.js', 'queuelimit', 2);
         $.registerChatCommand('./systems/youtubePlayer.js', 'requestlimit', 2);
         $.registerChatCommand('./systems/youtubePlayer.js', 'length');
-        $.registerChatCommand('./systems/youtubePlayer.js', "shuffle", 2);
+
         $.registerChatCommand('./systems/youtubePlayer.js', "position");
         $.registerChatCommand('./systems/youtubePlayer.js', "queuesize");
         $.registerChatCommand('./systems/youtubePlayer.js', "edit");
         $.registerChatSubcommand('edit', 'user', 2);
+
+        $.registerChatCommand('./systems/youtubePlayer.js', 'shufflewins');
 
         $.registerChatCommand('./systems/youtubePlayer.js', "promote", 2);
         $.registerChatCommand('./systems/youtubePlayer.js', "move", 2);
@@ -2841,6 +3165,16 @@
 
         $.registerChatCommand('./systems/youtubePlayer.js', "clearhistory", 2);
         $.registerChatCommand('./systems/youtubePlayer.js', "startstream", 0);
+
+        $.registerChatCommand('./systems/youtubePlayer.js', "save", 2);
+
+        // Shuffle system
+        $.registerChatCommand('./systems/youtubePlayer.js', "shuffle", 2);
+        $.registerChatSubcommand('shuffle', 'open', 2);
+        $.registerChatSubcommand('shuffle', 'close', 2);
+        $.registerChatSubcommand('shuffle', 'draw', 2);
+        $.registerChatSubcommand('shuffle', 'reset', 2);
+        $.registerChatSubcommand('shuffle', 'results', 7);
 
         loadPanelPlaylist();
         loadDefaultPl();
