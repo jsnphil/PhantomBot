@@ -32,6 +32,8 @@
             interval, timeout, followMessage = '',
             timerMessage = '';
 
+    /* New Shuffle System Functions */
+
     /**
      * @function reloadRaffle
      * @info used for the panel.
@@ -42,7 +44,6 @@
         raffleMessage = $.getIniDbString('shuffleSettings', 'raffleMessage');
         messageInterval = $.getIniDbNumber('shuffleSettings', 'raffleMessageInterval');
     }
-
     /**
      * @function open
      * @info opens a raffle
@@ -151,25 +152,25 @@
             return;
         }
 
-        var username = $.randElement(entries),
-                isFollowing = $.user.isFollower(username.toLowerCase()),
-                followMsg = (isFollowing ? $.lang.get('shufflesystem.isfollowing') : $.lang.get('shufflesystem.isnotfollowing'));
+        var username = $.randElement(entries);
 
-        $.say($.lang.get('shufflesystem.winner', username, followMsg));
-        $.inidb.set('shuffleresults', 'winner', username + ' ' + followMsg);
-
-        /* Remove the user from the array if we are not allowed to have multiple repicks. */
-        if (allowRepick) {
-            for (var i in entries) {
-                if (entries[i].equalsIgnoreCase(username)) {
-                    entries.splice(i, 1);
-                }
-            }
-            $.inidb.del('shuffleList', username);
-            $.inidb.decr('shuffleresults', 'shuffleEntries', 1);
+        $.inidb.incr("shufflewins", username, 1);
+        var wins = $.inidb.get("shufflewins", username);
+        var winMsg;
+        if (wins == 1) {
+            winMsg = "This is their first win in shuffle!";
+        } else {
+            winMsg = "They have won shuffle " + wins + " times!";
         }
 
-        // TODO Bump users song in the queue
+        $.say($.lang.get('shufflesystem.winner', username, winMsg));
+
+        var request = $.getUserRequest(username);
+
+        // Bump users song in the queue
+        $.getCurrentPlaylist.removeUserSong(username);
+        $.getCurrentPlaylist.addToQueue(request[0], 0);
+        $.getConnectedPlayerClient.pushSongList();
     }
 
     /**
@@ -196,8 +197,22 @@
             return;
         }
 
-        /* TODO Check if the user is one of the last 2 winners */
-        /* TODO Check if the user has a song in the queue */
+        /* Check if the user has a song in the queue */
+        var request = $.getUserRequest(username);
+        if (request == null) {
+            message(username, $.lang.get('shufflesystem.error.norequest'));
+            return;
+        }
+
+        /* Check if the user is one of the last 2 winners */
+        var recentUsers = $.currentPlaylist().getPreviousRequesters();
+        var history = recentUsers.toArray();
+        for (i = 0; i < history.length; i++) {
+            if (username.equalsIgnoreCase(history[i])) {
+                message(username, $.lang.get('shufflesystem.error.recentwinner'));
+                return;
+            }
+        }
 
         /* Push the user into the array */
         entered[username] = true;
@@ -259,32 +274,46 @@
                 action = args[0],
                 subAction = args[1];
 
-        if (command.equalsIgnoreCase('shuf')) {
+        // Shuffle Commands
+        if (command.equalsIgnoreCase('shuffle')) {
+            var player = $.getConnectedPlayerClient();
+            if (player == null) {
+                $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.client.404'));
+            }
+            var shuffleEnabled = $.isQueueShuffleEnabled();
+
+            if (!shuffleEnabled) {
+                $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.position.shuffle.disabled'));
+                return;
+            }
+
+            action = args[0];
+
             if (action === undefined) {
                 $.say($.whisperPrefix(sender) + $.lang.get('shufflesystem.usage'));
                 return;
             }
 
             /**
-             * @commandpath raffle open [entry fee] [keyword] [close timer] [-usepoints / -usetime / -followers] - Opens a custom raffle.
+             * @commandpath shuffle open [entry fee] [keyword] [close timer] [-usepoints / -usetime / -followers] - Opens a custom raffle.
              */
             if (action.equalsIgnoreCase('open')) {
                 open(sender, arguments);
-                $.log.event('A raffle was opened by: ' + sender + '. Arguments (' + arguments + ')');
+                $.log.event('A shuffle was opened by: ' + sender + '. Arguments (' + args[0] + ')');
                 return;
             }
 
             /**
-             * @commandpath raffle close - Closes the current raffle.
+             * @commandpath shuffle close - Closes the current raffle.
              */
             if (action.equalsIgnoreCase('close')) {
                 close(sender);
-                $.log.event('A raffle was closed by: ' + sender + '.');
+                $.log.event('A shuffle was closed by: ' + sender + '.');
                 return;
             }
 
             /**
-             * @commandpath raffle draw - Draws a winner from the current raffle list.
+             * @commandpath shuffle draw - Draws a winner from the current raffle list.
              */
             if (action.equalsIgnoreCase('draw')) {
                 draw(sender);
@@ -292,7 +321,7 @@
             }
 
             /**
-             * @commandpath raffle reset - Resets the raffle.
+             * @commandpath shuffle reset - Resets the shuffle.
              */
             if (action.equalsIgnoreCase('reset')) {
                 clear();
@@ -303,7 +332,7 @@
             }
 
             /**
-             * @commandpath raffle results - Give you the current raffle information if there is one active.
+             * @commandpath shuffle results - Give you the current raffle information if there is one active.
              */
             if (action.equalsIgnoreCase('results')) {
                 if (status) {
@@ -313,7 +342,7 @@
             }
 
             /**
-             * @commandpath raffle togglewarningmessages - Toggles the raffle warning messages when entering.
+             * @commandpath shuffle togglewarningmessages - Toggles the raffle warning messages when entering.
              */
             if (action.equalsIgnoreCase('togglewarningmessages')) {
                 sendMessages = !sendMessages;
@@ -324,7 +353,7 @@
 
             // TODO Change to make it so a winner can't win within 2 songs
             /**
-             * @commandpath raffle togglerepicks - Toggles if the same winner can be repicked more than one.
+             * @commandpath shuffle togglerepicks - Toggles if the same winner can be repicked more than one.
              */
             if (action.equalsIgnoreCase('togglerepicks')) {
                 allowRepick = !allowRepick;
@@ -334,7 +363,7 @@
             }
 
             /**
-             * @commandpath raffle message [message] - Sets the raffle auto annouce messages saying that raffle is still active.
+             * @commandpath shuffle message [message] - Sets the raffle auto annouce messages saying that raffle is still active.
              */
             if (action.equalsIgnoreCase('message')) {
                 if (subAction === undefined) {
@@ -349,7 +378,7 @@
             }
 
             /**
-             * @commandpath raffle messagetimer [minutes] - Sets the raffle auto annouce messages interval. 0 is disabled.
+             * @commandpath shuffle messagetimer [minutes] - Sets the raffle auto annouce messages interval. 0 is disabled.
              */
             if (action.equalsIgnoreCase('messagetimer')) {
                 if (subAction === undefined || isNaN(parseInt(subAction))) {
@@ -363,6 +392,14 @@
                 return;
             }
         }
+
+        if (command.equalsIgnoreCase('shufflewins')) {
+            var wins = $.inidb.get("shufflewins", sender);
+            if (wins == null) {
+                wins = 0;
+            }
+            $.say($.whisperPrefix(sender) + $.lang.get('shufflesystem.user.wins', wins));
+        }
     });
 
     /**
@@ -370,17 +407,16 @@
      * @info event sent to register commands
      */
     $.bind('initReady', function () {
-        $.registerChatCommand('./systems/custom/shuffleSystem.js', 'shuf', 2);
+        $.registerChatCommand('./systems/custom/shuffleSystem.js', 'shuffle', 2);
+        $.registerChatSubcommand('shuffle', 'open', 2);
+        $.registerChatSubcommand('shuffle', 'close', 2);
+        $.registerChatSubcommand('shuffle', 'draw', 2);
+        $.registerChatSubcommand('shuffle', 'reset', 2);
+        $.registerChatSubcommand('shuffle', 'results', 7);
 
-        $.registerChatSubcommand('shuf', 'open', 2);
-        $.registerChatSubcommand('shuf', 'close', 2);
-        $.registerChatSubcommand('shuf', 'draw', 2);
-        $.registerChatSubcommand('shuf', 'reset', 2);
-        $.registerChatSubcommand('shuf', 'results', 7);
-        $.registerChatSubcommand('shuf', 'togglemessages', 1);
-        $.registerChatSubcommand('shuf', 'togglerepicks', 1);
-        $.registerChatSubcommand('shuf', 'message', 1);
-        $.registerChatSubcommand('shuf', 'messagetimer', 1);
+        $.registerChatCommand('./systems/custom/shuffleSystem.js', 'shufflewins');
+
+
 
         // Mark the raffle as off for the panel.
 //        $.inidb.set('shuffleSettings', 'isActive', 'false');

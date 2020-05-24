@@ -20,7 +20,7 @@ $.lang.register('shufflesystem.open.usage', 'Usage: !shuffle open [keyword] [clo
 $.lang.register('shufflesystem.open', 'A shuffle is now opened! Type $1 to enter$2! $3');
 $.lang.register('shufflesystem.close.error.closed', 'There is no shuffle in progress.');
 $.lang.register('shufflesystem.close.success', 'The shuffle is now closed! No more entries will be counted. Use "!shuffle draw" to pick a winner!');
-$.lang.register('shufflesystem.winner', 'The winner of this shuffle is $1!  Your song will be played next!');
+$.lang.register('shufflesystem.winner', 'The winner of this shuffle is $1!  Your song will be played next! $2');
 $.lang.register('shufflesystem.repick.error', 'There are no more users in the shuffle list.');
 $.lang.register('shufflesystem.enter.404', 'You already entered this shuffle.');
 $.lang.register('shufflesystem.usage', 'Usage: !shuffle [open / close / draw / results / subscriberbonus/ regularbonus / whisperwinner]');
@@ -37,3 +37,8 @@ $.lang.register('shufflesystem.open.keyword-exists', 'Keyword cannot be an exist
 $.lang.register('shufflesystem.winner.404', 'Could not pick a winner. No one entered this shuffle.');
 $.lang.register('shufflesystem.reset', 'The shuffle has been reset.');
 $.lang.register('shufflesystem.enter.success', 'You have been entered in the shuffle.');
+$.lang.register('shufflesystem.error.recentwinner', 'You cannot enter a shuffle within two songs of your last song play');
+$.lang.register('shufflesystem.error.norequest', 'You do not have a request in the queue');
+$.lang.register('shufflesystem.user.wins', 'You have won shuffle $1 times kentobRIGGED');
+
+$.lang.register('shufflesystem.player.disabled', 'The music player is disabled');
