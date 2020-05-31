@@ -54,8 +54,9 @@
             /* @type {PlayerClientInterface} */
             connectedPlayerClient = null,
             /* @type {BotPlayList} */
-            currentPlaylist = null;
-
+            currentPlaylist = null,
+            shuffleBuffer = $.getSetIniDbNumber('shuffleSettings', 'songbuffer', 2)
+            ;
     /**
      * @function reloadyt
      */
@@ -93,6 +94,86 @@
     }
 
     /**
+     * @function loadDefaultPl
+     */
+    function loadDefaultPl() {
+        if (currentPlaylist === null && connectedPlayerClient !== null) {
+            /** Pre-load last activated playlist */
+            currentPlaylist = new BotPlayList(activePlaylistname, true);
+            /** if the current playlist is "default" and it's empty, add some default songs. */
+            if (currentPlaylist.getPlaylistname().equals('default') && currentPlaylist.getplaylistLength() == 0) {
+                /** whatfunk - Waves FREE CC0 No Copyright Royalty Free Music */
+                try {
+                    currentPlaylist.addToPlaylist(new YoutubeVideo('vY_kyk8yL9U', $.botName));
+                } catch (ex) {
+                    $.log.error("YoutubeVideo::exception: " + ex);
+                }
+
+                /** CYAN!DE - Scorpion FREE Electro House Music For Monetize */
+                try {
+                    currentPlaylist.addToPlaylist(new YoutubeVideo('q_Wk_dn-jEg', $.botName));
+                } catch (ex) {
+                    $.log.error("YoutubeVideo::exception: " + ex);
+                }
+
+                /** SmaXa - We're Coming In FREE Creative Commons Music */
+                try {
+                    currentPlaylist.addToPlaylist(new YoutubeVideo('5WRZ-bC5XzE', $.botName))
+                } catch (ex) {
+                    $.log.error("YoutubeVideo::exception: " + ex);
+                }
+
+                /** Static Love - Choices FREE Pop Music for Monetize */
+                try {
+                    currentPlaylist.addToPlaylist(new YoutubeVideo('9Y5CCHacHfk', $.botName))
+                } catch (ex) {
+                    $.log.error("YoutubeVideo::exception: " + ex);
+                }
+            }
+        }
+    }
+
+    /**
+     * @function loadDefaultPl
+     */
+    function loadDefaultPl() {
+        if (currentPlaylist === null && connectedPlayerClient !== null) {
+            /** Pre-load last activated playlist */
+            currentPlaylist = new BotPlayList(activePlaylistname, true);
+            /** if the current playlist is "default" and it's empty, add some default songs. */
+            if (currentPlaylist.getPlaylistname().equals('default') && currentPlaylist.getplaylistLength() == 0) {
+                /** whatfunk - Waves FREE CC0 No Copyright Royalty Free Music */
+                try {
+                    currentPlaylist.addToPlaylist(new YoutubeVideo('vY_kyk8yL9U', $.botName));
+                } catch (ex) {
+                    $.log.error("YoutubeVideo::exception: " + ex);
+                }
+
+                /** CYAN!DE - Scorpion FREE Electro House Music For Monetize */
+                try {
+                    currentPlaylist.addToPlaylist(new YoutubeVideo('q_Wk_dn-jEg', $.botName));
+                } catch (ex) {
+                    $.log.error("YoutubeVideo::exception: " + ex);
+                }
+
+                /** SmaXa - We're Coming In FREE Creative Commons Music */
+                try {
+                    currentPlaylist.addToPlaylist(new YoutubeVideo('5WRZ-bC5XzE', $.botName))
+                } catch (ex) {
+                    $.log.error("YoutubeVideo::exception: " + ex);
+                }
+
+                /** Static Love - Choices FREE Pop Music for Monetize */
+                try {
+                    currentPlaylist.addToPlaylist(new YoutubeVideo('9Y5CCHacHfk', $.botName))
+                } catch (ex) {
+                    $.log.error("YoutubeVideo::exception: " + ex);
+                }
+            }
+        }
+    }
+
+    /**
      * @class
      * @description This class holds information about a youtube video.
      * @param {string} searchQuery
@@ -105,7 +186,8 @@
                 videoTitle = '',
                 videoLength = -1,
                 license = 0,
-                embeddable = 0;
+                embeddable = 0,
+                bumped = false;
 
         this.found = false;
 
@@ -123,6 +205,14 @@
          */
         this.getOwner = function () {
             return owner;
+        };
+
+        this.setBumpFlag = function () {
+            bumped = true;
+        };
+
+        this.isBump = function () {
+            return bumped;
         };
 
         /**
@@ -1056,7 +1146,8 @@
                         "song": youtubeObject.getVideoId() + '',
                         "title": youtubeObject.getVideoTitle() + '',
                         "duration": youtubeObject.getVideoLengthMMSS() + '',
-                        "requester": youtubeObject.getOwner() + ''
+                        "requester": youtubeObject.getOwner() + '',
+                        "bump": youtubeObject.isBump() + ''
                     });
                 }
                 client.songList(JSON.stringify(jsonList));
@@ -1123,7 +1214,7 @@
             var requestOwner = youtubeVideo.getOwner();
 
             if (lastRequesters != null) {
-                if (lastRequesters.size() > 2) {
+                if (lastRequesters.size() > shuffleBuffer) {
                     lastRequesters.poll();
                 }
             }
@@ -1374,6 +1465,7 @@
         connectedPlayerClient = new PlayerClientInterface();
 
         $.consoleLn($.lang.get('ytplayer.console.client.connected'));
+        loadDefaultPl();
         connectedPlayerClient.pushPlayList();
         $.youtubePlayerConnected = true;
         $.ytplayer.setClientConnected(true);
@@ -2588,6 +2680,7 @@
         $.registerChatCommand('./systems/youtubePlayer.js', "save", 2);
 
         loadPanelPlaylist();
+        loadDefaultPl();
 
         // Initialize song counter
         $.inidb.set("songcounts", "totalsongs", 0);

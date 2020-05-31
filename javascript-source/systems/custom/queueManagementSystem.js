@@ -151,6 +151,7 @@
             }
 
             if (requestFound) {
+                existingRequest.setBumpFlag();
                 $.currentPlaylist().addToQueue(existingRequest, position);
                 $.getConnectedPlayerClient().pushSongList();
                 $.say($.whisperPrefix(bumper) + $.lang.get('songqueuemgmt.command.bump.success'));

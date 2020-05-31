@@ -363,6 +363,8 @@ $(function () {
                 player.API.loadVideoById(e.play, 0, 'medium');
                 toastr.success('Now playing: ' + (e.title.length > 30 ? e.title.substring(0, 30) + '...' : e.title));
             }
+	   
+            document.title = 'Kentobot Player - ' + e.title + ' - ' + e.requester;
 
             // Update the value under the slider.
             $('#progress-slider-value').html(e.duration);
@@ -479,6 +481,9 @@ $(function () {
         player.updateState(2);
         // Skip the song.
         player.skipSong();
+        
+        document.title = 'Kentobot Player - ' + player.temp.title + ' - ' + player.temp.requester;
+     
     });
 
     // Mute button.

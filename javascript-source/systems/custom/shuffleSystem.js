@@ -30,7 +30,8 @@
             raffleMessage = $.getSetIniDbString('shuffleSettings', 'raffleMessage', 'A raffle is still opened! Type (keyword) to enter. (entries) users have entered so far.'),
             messageInterval = $.getSetIniDbNumber('shuffleSettings', 'raffleMessageInterval', 0),
             interval, timeout, followMessage = '',
-            timerMessage = '';
+            timerMessage = '',
+            shuffleBuffer = $.getSetIniDbNumber('shuffleSettings', 'songbuffer', 2);
 
     /* New Shuffle System Functions */
 
@@ -152,15 +153,16 @@
             return;
         }
 
+        close(sender);
         var username = $.randElement(entries);
 
         $.inidb.incr("shufflewins", username, 1);
         var wins = $.inidb.get("shufflewins", username);
         var winMsg;
         if (wins == 1) {
-            winMsg = "This is their first win in shuffle!";
+            winMsg = $.lang.get('shufflesystem.user.first.win');
         } else {
-            winMsg = "They have won shuffle " + wins + " times!";
+            winMsg = $.lang.get('shufflesystem.user.win.count', wins);
         }
 
         $.say($.lang.get('shufflesystem.winner', username, winMsg));
@@ -168,9 +170,8 @@
         var request = $.getUserRequest(username);
 
         // Bump users song in the queue
-        $.getCurrentPlaylist.removeUserSong(username);
-        $.getCurrentPlaylist.addToQueue(request[0], 0);
-        $.getConnectedPlayerClient.pushSongList();
+        $.currentPlaylist().addToQueue(request[0], 0);
+        $.getConnectedPlayerClient().pushSongList();
     }
 
     /**
@@ -341,6 +342,18 @@
                 return;
             }
 
+            if (action.equalsIgnoreCase('buffer')) {
+                if (!args[1]) {
+                    $.say($.whisperPrefix(sender) + $.lang.get('shufflesystem.buffer.usage'));
+                    return;
+                }
+
+                shuffleBuffer = parseInt(args[1]);
+                $.inidb.set('shuffleSettings', 'songbuffer', shuffleBuffer);
+                $.say($.whisperPrefix(sender) + $.lang.get('shufflesystem.buffer.success', shuffleBuffer));
+                return;
+            }
+
             /**
              * @commandpath shuffle togglewarningmessages - Toggles the raffle warning messages when entering.
              */
@@ -413,8 +426,11 @@
         $.registerChatSubcommand('shuffle', 'draw', 2);
         $.registerChatSubcommand('shuffle', 'reset', 2);
         $.registerChatSubcommand('shuffle', 'results', 7);
+        $.registerChatSubcommand('shuffle', 'buffer', 2);
 
         $.registerChatCommand('./systems/custom/shuffleSystem.js', 'shufflewins');
+
+
 
 
 

@@ -41,4 +41,10 @@ $.lang.register('shufflesystem.error.recentwinner', 'You cannot enter a shuffle 
 $.lang.register('shufflesystem.error.norequest', 'You do not have a request in the queue');
 $.lang.register('shufflesystem.user.wins', 'You have won shuffle $1 times kentobRIGGED');
 
+$.lang.register('shufflesystem.user.first.win', 'This is their first win in shuffle!');
+$.lang.register('shufflesystem.user.win.count', 'They have won shuffle $1 times!')
+
 $.lang.register('shufflesystem.player.disabled', 'The music player is disabled');
+
+$.lang.register('shufflesystem.buffer.usage', 'Usage: !shuffle buffer [count]');
+$.lang.register('shufflesystem.buffer.success', 'Shuffle song buffer set to $1 songs');
