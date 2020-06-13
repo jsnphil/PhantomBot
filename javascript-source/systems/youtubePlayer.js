@@ -187,7 +187,8 @@
                 videoLength = -1,
                 license = 0,
                 embeddable = 0,
-                bumped = false;
+                bumped = false,
+                shuffle = false;
 
         this.found = false;
 
@@ -214,6 +215,15 @@
         this.isBump = function () {
             return bumped;
         };
+
+        this.setShuffleFlag = function () {
+            shuffle = true;
+        };
+
+        this.isShuffle = function () {
+            return shuffle;
+        };
+
 
         /**
          * @function getVideoLength
@@ -1173,7 +1183,7 @@
                         "duration": youtubeObject.getVideoLengthMMSS() + '',
                         "requester": youtubeObject.getOwner() + '',
                         "bump": youtubeObject.isBump() + '',
-                        "queue": queueStatus + ''
+                        "shuffle": youtubeObject.isShuffle() + ''
                     });
                 }
                 client.songList(JSON.stringify(jsonList));
@@ -1255,6 +1265,10 @@
             if (youtubeVideo != null && !youtubeVideo.getOwner().equalsIgnoreCase("kentobot")) {
                 currentPlaylist.addSongToHistory(youtubeVideo);
                 saveSongHistory(String($.username.resolve(requestOwner)), youtubeVideo.getVideoTitle(), youtubeVideo.getVideoId());
+            }
+
+            if (youtubeVideo.isBump()) {
+                $.decrementBumpCount();
             }
 
             client.play(youtubeVideo.getVideoId(), youtubeVideo.getVideoTitle(), youtubeVideo.getVideoLengthMMSS(), youtubeVideo.getOwner());
@@ -2166,19 +2180,51 @@
                 var req;
                 var playTime;
 
-                // If the user won SOTN in the previous stream, bump them
-                if (user == currentPlaylist.getSOTNWinner() && currentPlaylist.isSOTNBumpEnabled()) {
-                    var bumpPosition = 0;
-                    for (i = 0; i < currentPlaylist.getRequestsCount() - 1; i++) {
-                        req = currentPlaylist.getRequestAtIndex(i);
-                        if (!req.isBump()) {
-                            bumpPosition = i;
+                var usersToBump = $.getUsersToBump();
+                var completedBumps = $.getCompletedBumps();
+                var bumpUser = false;
+                var usedFreeBump = false;
+
+                for (i = 0; i < completedBumps.length; i++) {
+                    if (user == completedBumps[i]) {
+                        usedFreeBump = true;
+                        break;
+                    }
+                }
+
+                var freeBump = false;
+                if (!usedFreeBump) {
+                    for (i = 0; i < usersToBump.length; i++) {
+                        if (user == usersToBump[i]) {
+                            $.say($.whisperPrefix(user) + $.lang.get('ytplayer.autobump.sub'));
+                            $.markUserBumpComplete(user);
+                            freeBump = true;
+
+                            var bumpPosition = $.getBumpCount();
+                            request.setBumpFlag();
+                            $.currentPlaylist().addToQueue(request, bumpPosition);
+                            $.incrementBumpCount();
                             break;
                         }
                     }
+                }
 
+                // TODO Go through list and see if they are owed a bump, if yes, move them to the bottom of the bump list
+                if (user == currentPlaylist.getSOTNWinner() && currentPlaylist.isSOTNBumpEnabled() && !freeBump) {
+                    // If the user won SOTN in the previous stream, bump them
+//                    var bumpPosition = 0;
+//                    for (i = 0; i < currentPlaylist.getRequestsCount() - 1; i++) {
+//                        req = currentPlaylist.getRequestAtIndex(i);
+//                        if (!req.isBump()) {
+//                            bumpPosition = i;
+//                            break;
+//                        }
+//                    }
+
+                    var bumpPosition = $.getBumpCount();
                     request.setBumpFlag();
-                    $.currentPlaylist().addToQueue(request, bumpPosition);
+                    $.currentPlaylist().addToQueue(request, bumpPosition - 1);
+                    $.incrementBumpCount();
 
                     void $.inidb.del("sotn", "streams-since-redeem");
                     void $.inidb.del("sotn", "winner");
@@ -2503,6 +2549,7 @@
         }
 
         if (command.equalsIgnoreCase("startstream")) {
+
             currentPlaylist.clearSongHistory();
             $.say($.lang.get('ytplayer.startstream.clearhistory'));
 
@@ -2687,12 +2734,27 @@
         return shuffleQueue;
     }
 
+    function getBumpPosition() {
+        var queue = getSongQueue()
+        var bumpPosition = 0;
+        for (i = 0; i < queue.getRequestsCount() - 1; i++) {
+            req = queue.getRequestAtIndex(i);
+            if (!req.isBump()) {
+                bumpPosition = i;
+                break;
+            }
+        }
+
+        return bumpPosition;
+    }
+
     $.getSongQueue = getSongQueue;
     $.getUserRequest = getUserRequest;
     $.currentPlaylist = getCurrentPlaylist;
     $.getConnectedPlayerClient = getConnectedPlayerClient;
     $.toggleQueueShuffle = toggleQueueShuffle;
     $.isQueueShuffleEnabled = isQueueShuffleEnabled;
+    $.getBumpPosition = getBumpPosition;
 
     /* --- */
 

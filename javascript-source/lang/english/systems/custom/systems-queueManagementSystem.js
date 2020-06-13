@@ -20,3 +20,8 @@ $.lang.register('songqueuemgmt.command.move.404', '$1 does not have a song in th
 $.lang.register('songqueuemgmt.command.move.error.length', 'Invalid song position - the queue only has $1 songs');
 
 $.lang.register('songqueuemgmt.startstream.clearbumps', 'Resetting user bumps');
+
+$.lang.register('songqueuemgmt.command.bump.count', 'There $1 bumped requests in the queue');
+
+$.lang.register('songqueuemgmt.autobump.queue', 'Your song will be bumped to the top of the queue');
+$.lang.register('songqueuemgmt.autobump.nextsong', 'You will get a free bump on your next request!');

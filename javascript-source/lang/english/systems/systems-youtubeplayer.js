@@ -180,3 +180,4 @@ $.lang.register('ytplayer.startstream.shuffle.on', 'Setting the play mode to shu
 $.lang.register('ytplayer.discord.save', '$1, requested by $2 $3');
 $.lang.register('ytplayer.discord.save.history', 'Saving request to Discord - $1 requested by $2');
 
+$.lang.register('ytplayer.autobump.sub', "$1, your song is automatically getting bumped for your sub!");

@@ -22,7 +22,10 @@
  */
 (function () {
     var bumpedUsers = [],
-            bumpLimit = $.getSetIniDbNumber('songqueuemgmt', 'bumpLimit', 1);
+            usersToBump = [],
+            bumpLimit = $.getSetIniDbNumber('songqueuemgmt', 'bumpLimit', 1),
+            usedAutoBumps = [],
+            bumpCount = 0;
 
     /**
      @class
@@ -97,6 +100,8 @@
                 return;
             }
 
+            // TODO If original song was a bump, mark the new one as a bump
+
             var position, override = false;
             if (!args[1]) {
                 position = 0;
@@ -152,12 +157,13 @@
 
             if (requestFound) {
                 existingRequest.setBumpFlag();
-                $.currentPlaylist().addToQueue(existingRequest, position);
+                $.currentPlaylist().addToQueue(existingRequest, bumpCount);
                 $.getConnectedPlayerClient().pushSongList();
                 $.say($.whisperPrefix(bumper) + $.lang.get('songqueuemgmt.command.bump.success'));
 
                 bumpedUser.incrementBumpCount();
                 bumpedUsers.push(bumpedUser);
+                bumpCount++;
             } else {
                 $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.command.move.none', bumper));
             }
@@ -190,6 +196,8 @@
                 return;
             }
 
+            // TODO If song was a bump, mark it as a bump in the new spot
+
             var i, requestFound = false;
             var existingRequest;
             for (i = 0; i < requestsList.length; i++) {
@@ -212,14 +220,64 @@
             }
         }
 
+        if (command.equalsIgnoreCase('bumpcount')) {
+            if (bumpCount == 1) {
+                $.say($.lang.get('songqueuemgmt.command.bump.count', 'is 1'));
+            } else {
+                $.say($.lang.get('songqueuemgmt.command.bump.count', 'are ' + bumpCount));
+            }
+            return;
+        }
+
     });
 
     function clearBumpedUsers() {
         bumpedUsers = [];
+        usedAutoBumps = [];
+        usersToBump = [];
+        bumpCount = 0;
         $.say($.lang.get('songqueuemgmt.startstream.clearbumps'));
     }
 
+    function addUserToBumpList(user) {
+        $.say($.whisperPrefix(user) + $.lang.get('songqueuemgmt.autobump.nextsong'));
+        usersToBump.push(user);
+    }
+
+    function getUsersToBump() {
+        return usersToBump;
+    }
+
+    function markUserBumpComplete(user) {
+        return usedAutoBumps.push(user);
+    }
+
+    function getCompletedBumps() {
+        return usedAutoBumps;
+    }
+
+    function incrementBumpCount() {
+        bumpCount++;
+    }
+
+    function decrementBumpCount() {
+        if (bumpCount != 0) {
+            bumpCount--;
+        }
+    }
+
+    function getBumpCount() {
+        return bumpCount;
+    }
+
     $.clearBumpedUsers = clearBumpedUsers;
+    $.getUsersToBump = getUsersToBump;
+    $.addUserToBumpList = addUserToBumpList;
+    $.markUserBumpComplete = markUserBumpComplete;
+    $.getCompletedBumps = getCompletedBumps;
+    $.incrementBumpCount = incrementBumpCount;
+    $.decrementBumpCount = decrementBumpCount;
+    $.getBumpCount = getBumpCount;
 
     /**
      * @event initReady
@@ -234,5 +292,6 @@
         $.registerChatCommand('./systems/custom/queueManagementSystem.js', 'bump', 2);
         $.registerChatCommand('./systems/custom/queueManagementSystem.js', 'move', 2);
         $.registerChatCommand('./systems/custom/queueManagementSystem.js', 'bumplimit', 2);
+        $.registerChatCommand('./systems/custom/queueManagementSystem.js', 'bumpcount', 2);
     });
 })();
