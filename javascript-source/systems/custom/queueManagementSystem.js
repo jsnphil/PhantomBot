@@ -104,11 +104,11 @@
 
             var position, override = false;
             if (!args[1]) {
-                position = 0;
+                position = bumpCount;
             } else {
                 if (isNaN(parseInt(args[1])) && args[1].equalsIgnoreCase("allow")) {
                     override = true;
-                    position = 0;
+                    position = bumpCount;
                 } else {
                     position = args[1] - 1;
                 }
@@ -157,7 +157,7 @@
 
             if (requestFound) {
                 existingRequest.setBumpFlag();
-                $.currentPlaylist().addToQueue(existingRequest, bumpCount);
+                $.currentPlaylist().addToQueue(existingRequest, position);
                 $.getConnectedPlayerClient().pushSongList();
                 $.say($.whisperPrefix(bumper) + $.lang.get('songqueuemgmt.command.bump.success'));
 
