@@ -2211,19 +2211,9 @@
 
                 // TODO Go through list and see if they are owed a bump, if yes, move them to the bottom of the bump list
                 if (user == currentPlaylist.getSOTNWinner() && currentPlaylist.isSOTNBumpEnabled() && !freeBump) {
-                    // If the user won SOTN in the previous stream, bump them
-//                    var bumpPosition = 0;
-//                    for (i = 0; i < currentPlaylist.getRequestsCount() - 1; i++) {
-//                        req = currentPlaylist.getRequestAtIndex(i);
-//                        if (!req.isBump()) {
-//                            bumpPosition = i;
-//                            break;
-//                        }
-//                    }
-
                     var bumpPosition = $.getBumpCount();
                     request.setBumpFlag();
-                    $.currentPlaylist().addToQueue(request, bumpPosition - 1);
+                    $.currentPlaylist().addToQueue(request, bumpPosition);
                     $.incrementBumpCount();
 
                     void $.inidb.del("sotn", "streams-since-redeem");

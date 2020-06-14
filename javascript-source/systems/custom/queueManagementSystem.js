@@ -270,6 +270,38 @@
         return bumpCount;
     }
 
+    function autoBump(user) {
+        user = user.toLowerCase();
+        var i;
+        var completedBumps = $.getCompletedBumps();
+        var bumpRedeemed = false;
+        for (i = 0; i < completedBumps.length; i++) {
+            if (user == completedBumps[i]) {
+                bumpRedeemed = true;
+            }
+        }
+
+        if (!bumpRedeemed) {
+            var userSongInQueue = $.getUserRequest(user);
+            if (userSongInQueue == null) {
+                $.addUserToBumpList(user);
+            } else {
+                var bumpPosition = $.getBumpCount();
+
+                $.say($.whisperPrefix(user) + $.lang.get('songqueuemgmt.autobump.queue'));
+
+                var request = $.getUserRequest(user);
+                request[0].setBumpFlag();
+
+                $.currentPlaylist().addToQueue(request[0], bumpPosition);
+                $.getConnectedPlayerClient().pushSongList();
+
+                $.incrementBumpCount();
+                $.markUserBumpComplete(user);
+            }
+        }
+    }
+
     $.clearBumpedUsers = clearBumpedUsers;
     $.getUsersToBump = getUsersToBump;
     $.addUserToBumpList = addUserToBumpList;
@@ -278,6 +310,7 @@
     $.incrementBumpCount = incrementBumpCount;
     $.decrementBumpCount = decrementBumpCount;
     $.getBumpCount = getBumpCount;
+    $.autoBump = autoBump;
 
     /**
      * @event initReady

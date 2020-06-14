@@ -116,7 +116,7 @@
 
             $.say(message);
 
-            autoBump(subscriber);
+            $.autoBump(subscriber);
 
             $.addSubUsersList(subscriber);
             $.restoreSubscriberStatus(subscriber);
@@ -144,10 +144,8 @@
                 message = $.replace(message, '(reward)', String(subReward));
             }
 
-
-
             $.say(message);
-            autoBump(subscriber);
+            $.autoBump(subscriber);
 
             $.addSubUsersList(subscriber);
             $.restoreSubscriberStatus(subscriber);
@@ -196,7 +194,7 @@
 
             $.say(message);
 
-            autoBump(subscriber);
+            $.autoBump(resubscriber);
 
             $.addSubUsersList(resubscriber);
             $.restoreSubscriberStatus(resubscriber);
@@ -248,7 +246,7 @@
 
             $.say(message);
 
-            autoBump(gifter);
+            $.autoBump(gifter);
 
             $.addSubUsersList(recipient);
             $.restoreSubscriberStatus(recipient);
@@ -656,41 +654,10 @@
         }
 
         if (command.equalsIgnoreCase('subtest')) {
-            autoBump(action);
+            $.autoBump(action);
             return;
         }
     });
-
-    function autoBump(user) {
-        var i;
-        var completedBumps = $.getCompletedBumps();
-        var bumpRedeemed = false;
-        for (i = 0; i < completedBumps.length; i++) {
-            if (user == completedBumps[i]) {
-                bumpRedeemed = true;
-            }
-        }
-
-        if (!bumpRedeemed) {
-            var userSongInQueue = $.getUserRequest(user);
-            if (userSongInQueue == null) {
-                $.addUserToBumpList(user);
-            } else {
-                var bumpPosition = $.getBumpCount();
-
-                $.say($.whisperPrefix(user) + $.lang.get('songqueuemgmt.autobump.queue'));
-
-                var request = $.getUserRequest(user);
-                request[0].setBumpFlag();
-
-                $.currentPlaylist().addToQueue(request[0], bumpPosition);
-                $.getConnectedPlayerClient().pushSongList();
-
-                $.incrementBumpCount();
-                $.markUserBumpComplete(user);
-            }
-        }
-    }
 
     /**
      * @event initReady
