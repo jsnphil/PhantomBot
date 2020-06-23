@@ -24,8 +24,7 @@
     var bumpedUsers = [],
             usersToBump = [],
             bumpLimit = $.getSetIniDbNumber('songqueuemgmt', 'bumpLimit', 1),
-            usedAutoBumps = [],
-            bumpCount = 0;
+            usedAutoBumps = [];
 
     /**
      @class
@@ -104,18 +103,17 @@
 
             var position, override = false;
             if (!args[1]) {
-                position = bumpCount;
+                position = $.getBumpPosition();
             } else {
                 if (isNaN(parseInt(args[1])) && args[1].equalsIgnoreCase("allow")) {
-                    override = true;
-                    position = bumpCount;
+                    position = $.getBumpPosition();
                 } else {
                     position = args[1] - 1;
                 }
             }
 
             if (position > $.currentPlaylist().getRequestsCount()) {
-                $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.command.move.error.length', currentPlaylist.getRequestsCount()));
+                $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.command.move.error.length', $.currentPlaylist.getRequestsCount()));
                 return;
             }
 
@@ -163,7 +161,6 @@
 
                 bumpedUser.incrementBumpCount();
                 bumpedUsers.push(bumpedUser);
-                bumpCount++;
             } else {
                 $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.command.move.none', bumper));
             }
@@ -183,7 +180,7 @@
             }
 
             if (newPosition > $.currentPlaylist().getRequestsCount()) {
-                $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.command.move.error.length', currentPlaylist.getRequestsCount()));
+                $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.command.move.error.length', $.currentPlaylist.getRequestsCount()));
                 return;
             }
 
@@ -221,11 +218,14 @@
         }
 
         if (command.equalsIgnoreCase('bumpcount')) {
-            if (bumpCount == 1) {
+            var count = $.getBumpPosition();
+
+            if (count == 1) {
                 $.say($.lang.get('songqueuemgmt.command.bump.count', 'is 1'));
             } else {
-                $.say($.lang.get('songqueuemgmt.command.bump.count', 'are ' + bumpCount));
+                $.say($.lang.get('songqueuemgmt.command.bump.count', 'are ' + count));
             }
+
             return;
         }
 
@@ -235,7 +235,6 @@
         bumpedUsers = [];
         usedAutoBumps = [];
         usersToBump = [];
-        bumpCount = 0;
         $.say($.lang.get('songqueuemgmt.startstream.clearbumps'));
     }
 
@@ -256,27 +255,12 @@
         return usedAutoBumps;
     }
 
-    function incrementBumpCount() {
-        bumpCount++;
-    }
-
-    function decrementBumpCount() {
-        if (bumpCount != 0) {
-            bumpCount--;
-        }
-    }
-
-    function getBumpCount() {
-        return bumpCount;
-    }
-
     function autoBump(user) {
-        user = user.toLowerCase();
         var i;
-        var completedBumps = $.getCompletedBumps();
+        var completedBumps = getCompletedBumps();
         var bumpRedeemed = false;
         for (i = 0; i < completedBumps.length; i++) {
-            if (user == completedBumps[i]) {
+            if (user.equalsIgnoreCase(completedBumps[i])) {
                 bumpRedeemed = true;
             }
         }
@@ -284,9 +268,9 @@
         if (!bumpRedeemed) {
             var userSongInQueue = $.getUserRequest(user);
             if (userSongInQueue == null) {
-                $.addUserToBumpList(user);
+                addUserToBumpList(user);
             } else {
-                var bumpPosition = $.getBumpCount();
+                var bumpPosition = $.getBumpPosition();
 
                 $.say($.whisperPrefix(user) + $.lang.get('songqueuemgmt.autobump.queue'));
 
@@ -296,8 +280,7 @@
                 $.currentPlaylist().addToQueue(request[0], bumpPosition);
                 $.getConnectedPlayerClient().pushSongList();
 
-                $.incrementBumpCount();
-                $.markUserBumpComplete(user);
+                markUserBumpComplete(user);
             }
         }
     }
@@ -307,9 +290,6 @@
     $.addUserToBumpList = addUserToBumpList;
     $.markUserBumpComplete = markUserBumpComplete;
     $.getCompletedBumps = getCompletedBumps;
-    $.incrementBumpCount = incrementBumpCount;
-    $.decrementBumpCount = decrementBumpCount;
-    $.getBumpCount = getBumpCount;
     $.autoBump = autoBump;
 
     /**

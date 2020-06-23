@@ -1260,15 +1260,11 @@
             }
 
             // Increment request count for user
-            $.inidb.incr("songcounts", requestOwner + "-request-counts", 1);
+            $.inidb.incr("so/ngcounts", requestOwner + "-request-counts", 1);
 
             if (youtubeVideo != null && !youtubeVideo.getOwner().equalsIgnoreCase("kentobot")) {
                 currentPlaylist.addSongToHistory(youtubeVideo);
                 saveSongHistory(String($.username.resolve(requestOwner)), youtubeVideo.getVideoTitle(), youtubeVideo.getVideoId());
-            }
-
-            if (youtubeVideo.isBump()) {
-                $.decrementBumpCount();
             }
 
             client.play(youtubeVideo.getVideoId(), youtubeVideo.getVideoTitle(), youtubeVideo.getVideoLengthMMSS(), youtubeVideo.getOwner());
@@ -2200,10 +2196,9 @@
                             $.markUserBumpComplete(user);
                             freeBump = true;
 
-                            var bumpPosition = $.getBumpCount();
+                            var bumpPosition = $.getBumpPosition();
                             request.setBumpFlag();
                             $.currentPlaylist().addToQueue(request, bumpPosition);
-                            $.incrementBumpCount();
                             break;
                         }
                     }
@@ -2211,10 +2206,9 @@
 
                 // TODO Go through list and see if they are owed a bump, if yes, move them to the bottom of the bump list
                 if (user == currentPlaylist.getSOTNWinner() && currentPlaylist.isSOTNBumpEnabled() && !freeBump) {
-                    var bumpPosition = $.getBumpCount();
+                    var bumpPosition = $.getBumpPosition();
                     request.setBumpFlag();
                     $.currentPlaylist().addToQueue(request, bumpPosition);
-                    $.incrementBumpCount();
 
                     void $.inidb.del("sotn", "streams-since-redeem");
                     void $.inidb.del("sotn", "winner");
@@ -2654,7 +2648,7 @@
         var requests = currentPlaylist.getRequestList();
         for (i = 0; i < requests.length; i++) {
             request = requests[i];
-            if (request.getOwner() == user) {
+            if (request.getOwner().equalsIgnoreCase(user)) {
                 return [request, i, timeToPlayInSeconds];
             } else {
                 timeToPlayInSeconds = timeToPlayInSeconds + parseInt(request.getVideoLength(), 10);
@@ -2725,10 +2719,11 @@
     }
 
     function getBumpPosition() {
-        var queue = getSongQueue()
         var bumpPosition = 0;
-        for (i = 0; i < queue.getRequestsCount() - 1; i++) {
-            req = queue.getRequestAtIndex(i);
+        var i;
+
+        for (i = 0; i < currentPlaylist.getRequestsCount(); i++) {
+            req = currentPlaylist.getRequestAtIndex(i);
             if (!req.isBump()) {
                 bumpPosition = i;
                 break;
