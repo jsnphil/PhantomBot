@@ -2524,6 +2524,12 @@
                 return;
             }
 
+            if (existingRequest[0].isBump()) {
+                newRequest.setBumpFlag();
+            } else if (existingRequest[0].isShuffle()) {
+                newRequest.setShuffleFlag();
+            }
+
             if (isRequestAllowed(user, newRequest)) {
                 currentPlaylist.removeUserSong(user);
                 currentPlaylist.addToQueue(newRequest, existingRequest[1]);

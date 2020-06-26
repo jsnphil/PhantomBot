@@ -174,7 +174,10 @@
         // Bump users song in the queue
         // TODO Mark song as a shuffle
         request[0].setShuffleFlag();
-        $.currentPlaylist().addToQueue(request[0], 0);
+
+        var position = $.getBumpPosition();
+
+        $.currentPlaylist().addToQueue(request[0], position);
         $.getConnectedPlayerClient().pushSongList();
     }
 

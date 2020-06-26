@@ -10,7 +10,7 @@ $.lang.register('songqueuemgmt.command.bumplimit.success.off', 'Bump limits have
 $.lang.register('songqueuemgmt.command.bumplimit.success', "Bump limits are now set to $1");
 
 $.lang.register('songqueuemgmt.command.bump.usage', 'Usage: !bump [user] [position] [allow]');
-$.lang.register('songqueuemgmt.command.bump.success', 'Your song has been bumped to the top of the queue.');
+$.lang.register('songqueuemgmt.command.bump.success', 'Your song has been bumped to position $1');
 $.lang.register('songqueuemgmt.command.bump.limit.reached', '$1 has reached their bump limit for the stream.');
 
 $.lang.register('songqueuemgmt.command.move.usage', 'Usage: !move [user] [position]');
