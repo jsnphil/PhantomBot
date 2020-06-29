@@ -156,6 +156,7 @@
         if (status) {
             close(sender);
         }
+      
         var username = $.randElement(entries);
 
         $.inidb.incr("shufflewins", username, 1);
@@ -174,9 +175,7 @@
         // Bump users song in the queue
         // TODO Mark song as a shuffle
         request[0].setShuffleFlag();
-
         var position = $.getBumpPosition();
-
         $.currentPlaylist().addToQueue(request[0], position);
         $.getConnectedPlayerClient().pushSongList();
     }

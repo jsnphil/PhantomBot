@@ -224,7 +224,6 @@
             return shuffle;
         };
 
-
         /**
          * @function getVideoLength
          * @returns {number}

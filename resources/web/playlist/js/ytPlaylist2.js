@@ -152,6 +152,7 @@ function handleSongList(d) {
     for (var i in d['songlist']) {
         var playerIndex = parseInt(i, 10) + 1;
         var bumped = d['songlist'][i]['bump'];
+        var shuffle = d['songlist'][i]['shuffle'];
         var id = d['songlist'][i]['song'];
         var title = d['songlist'][i]['title'];
         var duration = d['songlist'][i]['duration'];
