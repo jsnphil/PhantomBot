@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2018 phantombot.tv
+ * Copyright (C) 2016-2020 phantom.bot
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ var DEBUG_MODE = false;
 var connectedToWS = false;
 
 var url = window.location.host.split(":");
-var addr = (getProtocol() == 'https://' ? 'wss://' : 'ws://') + url[0] + ':' + getPlayerPort();
+var addr = (getProtocol() === 'https://' || window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/ws/ytplayer';
 var connection = new WebSocket(addr, []);
 var currentVolume = 0;
 
@@ -43,7 +43,7 @@ connection.onopen = function (data) {
     connectedToWS = true;
 
     var jsonObject = {};
-    jsonObject["readauth"] = getAuth();
+    jsonObject["authenticate"] = getAuth();
     connection.send(JSON.stringify(jsonObject));
     debugMsg("onPlayerReady::connection.send(" + JSON.stringify(jsonObject) + ")");
 }
@@ -63,14 +63,21 @@ connection.onmessage = function (e) {
 
     debugMsg('connection.onmessage(' + e.data + ')');
 
-    if (messageObject['authresult'] === false) {
+    if (messageObject.ping !== undefined) {
+        connection.send(JSON.stringify({
+            pong: "pong"
+        }));
+        return;
+    }
+
+    if (messageObject['authresult'] === 'false') {
         if (!messageObject['authresult']) {
             newAlert('WS Auth Failed', 'Reload page, if that fails, let the caster know', 'danger', 0);
             return;
         }
         return;
     }
-    if (messageObject['authresult'] === true) {
+    if (messageObject['authresult'] === 'true') {
         refreshData();
     }
 
@@ -97,67 +104,38 @@ connection.onmessage = function (e) {
         handlePlayList(messageObject);
         return;
     }
-
-    if (messageObject['requestHistory'] !== undefined) {
-        handleSongHistoryList(messageObject);
-        return;
-    }
 }
 
 function handleNewSong(title, duration, requester, id) {
     debugMsg('handleNewSong(' + title + ', ' + duration + ', ' + requester + ')');
-    $('#currentSongTable').html(
-            '<tr><th>Song Title</th><th>Requester</th><th>Duration</th></tr>' +
-            '<tr><td><a href="https://youtu.be/' + id + '" target="_blank">' + title + '</a></td><td>' + requester + '</td><td>' + duration + '</td></tr>');
+    $('#currentSongTable').html('<tr><th>Song Title</th><th>Requester</th><th>Duration</th><th>YouTube ID</th></tr>' +
+            '<tr><td>' + title + '</td><td>' + requester + '</td><td>' + duration + '</td><td>' + id + '</td></tr>');
 }
 
 function handlePlayList(d) {
     debugMsg('handlePlayList(' + d + ')');
     $('#playlistTableTitle').html('Current Playlist: ' + d['playlistname']);
-    var tableData = '<tr><th>Song Title</th></tr>';
+    var tableData = '<tr><th>Song Title</th><th>Duration</th><th>YouTube ID</th></tr>';
     for (var i in d['playlist']) {
         var id = d['playlist'][i]['song'];
         var title = d['playlist'][i]['title'];
-        //var requester = d['playlist'][i]['requester'];
-
-        tableData += '<tr><td><a href="https://youtu.be/' + id + '" target="_blank">' + title + '</a></td></tr>';
+        var duration = d['playlist'][i]['duration'];
+        tableData += '<tr><td>' + title + '</td><td>' + duration + '</td><td>' + id + '</td></tr>';
     }
     $('#playlistTable').html(tableData);
 }
 
 function handleSongList(d) {
     debugMsg('handleSongList(' + d + ')');
-    var tableData = '<tr><th>Position</th><th>Song Title</th><th>Requester</th><th>Duration</th></tr>';
+    var tableData = '<tr><th>Song Title</th><th>Requester</th><th>Duration</th><th>YouTube ID</th></tr>';
     for (var i in d['songlist']) {
-        var playerIndex = parseInt(i, 10) + 1;
-        var bumped = d['songlist'][i]['bump'];
         var id = d['songlist'][i]['song'];
         var title = d['songlist'][i]['title'];
         var duration = d['songlist'][i]['duration'];
         var requester = d['songlist'][i]['requester'];
-        tableData += '<tr><td>' + playerIndex;
-
-        if (bumped == "true") {
-            tableData += ' <i class="fas fa-star"></i>';
-        }
-
-        tableData += '</td><td><a href="https://youtu.be/' + id + '" target="_blank">' + title + '</a></td><td>' + requester + '</td><td>' + duration + '</td></tr>';
+        tableData += '<tr><td>' + title + '</td><td>' + requester + '</td><td>' + duration + '</td><td>' + id + '</td></tr>';
     }
     $('#songTable').html(tableData);
-}
-
-function handleSongHistoryList(d) {
-    debugMsg('handleSongHistoryList(' + d + ')');
-    var tableData = '<tr><th>Song Title</th><th>Requester</th><th>Duration</th></tr>';
-    for (var i in d['requestHistory']) {
-//        var playerIndex = parseInt(i, 10) + 1;
-        var id = d['requestHistory'][i]['song'];
-        var title = d['requestHistory'][i]['title'];
-        var duration = d['requestHistory'][i]['duration'];
-        var requester = d['requestHistory'][i]['requester'];
-        tableData += '<tr><td><a href="https://youtu.be/' + id + '" target="_blank">' + title + '</a></td><td>' + requester + '</td><td>' + duration + '</td></tr>';
-    }
-    $('#requestHistoryTable').html(tableData);
 }
 
 // Type is: success (green), info (blue), warning (yellow), danger (red)
@@ -185,8 +163,5 @@ function refreshData() {
     connection.send(JSON.stringify(jsonObject));
     jsonObject['query'] = 'playlist';
     connection.send(JSON.stringify(jsonObject));
-    jsonObject['query'] = 'songrequesthistory';
-    connection.send(JSON.stringify(jsonObject));
 }
 setInterval(refreshData, 20000);
-

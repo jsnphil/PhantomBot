@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2018 phantombot.tv
+ * Copyright (C) 2016-2020 phantom.bot
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,8 @@ $(function() {
 			hosts.push([
 				json.host,
 				new Date(parseInt(json.time)).toLocaleString(),
-				helpers.getDefaultIfNullOrUndefined(json.viewers, 'N/A')
+				helpers.getDefaultIfNullOrUndefined(json.viewers, 'N/A'),
+				parseInt(json.time)
 			]);
 		}
 
@@ -40,8 +41,9 @@ $(function() {
     		],
 			'columns': [
 				{ 'title': 'Username' },
-				{ 'title': 'Date', 'orderData': [1] },
-				{ 'title': 'Viewers' }
+				{ 'title': 'Date', 'orderData': [3] },
+				{ 'title': 'Viewers' },
+				{ 'visible': false }
 			]
 		});
 	});

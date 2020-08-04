@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2018 phantombot.tv
+ * Copyright (C) 2016-2020 phantom.bot
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,11 +26,9 @@
  * For more functions under the "player" object, take a look at the socket.js script.
  * You can also generate modals with jQuery, see util/helpers.js for more information.
  */
-$(function () {
+$(function() {
     var cluster = null,
-            timer = null;
-
-
+        timer = null;
 
     /*
      * @function Loads the player page.
@@ -86,8 +84,7 @@ $(function () {
                         }
                     }).modal('toggle');
                 });
-            }).modal('toggle');
-            ;
+            }).modal('toggle');;
         }
     };
 
@@ -118,7 +115,7 @@ $(function () {
         // Add a listener to load the main playlist.
         player.addListener('playlist', (e) => {
             let table = [],
-                    playlist = e.playlist;
+                playlist = e.playlist;
 
             // Set the playlist name.
             $('#playlist-name').html('(' + e.playlistname + ')');
@@ -227,37 +224,18 @@ $(function () {
         // Add a listener for the songrequest queue.
         player.addListener('songlist', (e) => {
             let table = $('#queue-table-content'),
-                    songlist = e.songlist;
+                songlist = e.songlist;
 
             // Remove the current data from the table.
             table.find('tr:gt(0)').remove();
 
             for (let i = 0; i < songlist.length; i++) {
-
-                if (songlist[i].shuffle == "true") {
-                    console.log("Song is a shuffle");
-                }
-
                 let row = $('<tr/>');
 
-                if (songlist[i].bump == "true") {
-                    row.append($('<td/>', {
-                        'html': $('<i/>', {
-                            'class': 'fas fa-star'
-                        })
-                    }));
-                } else if (songlist[i].shuffle == "true") {
-                    row.append($('<td/>', {
-                        'html': $('<i/>', {
-                            'class': 'fas fa-dice'
-                        })
-                    }));
-                } else {
-                    // Add position.
-                    row.append($('<td/>', {
-                        'text': i + 1
-                    }));
-                }
+                // Add position.
+                row.append($('<td/>', {
+                    'text': i
+                }));
 
                 // Add song name.
                 row.append($('<td/>', {
@@ -294,7 +272,6 @@ $(function () {
                             player.removeSongFromRequest($(e.currentTarget).data('song'));
                             // Hide the tooltip, or could stay opened.
                             $(e.currentTarget).tooltip('hide');
-                            document.title = 'Kentobot Player - ' + songlist[i].title + ' - ' + songlist[i].requester;
                         }
                     })).append($('<button/>', {
                         'type': 'button',
@@ -380,12 +357,8 @@ $(function () {
                 toastr.info('Song queued: ' + (e.title.length > 30 ? e.title.substring(0, 30) + '...' : e.title));
             } else {
                 player.API.loadVideoById(e.play, 0, 'medium');
-                toastr.success('Now playing: ' + (e.title.length > 30 ? e.title.substring(0, 30) + '...' : e.title));
+                toastr.success('Now playing: ' +  (e.title.length > 30 ? e.title.substring(0, 30) + '...' : e.title));
             }
-
-            document.title = 'Kentobot Player - ' + e.title + ' - ' + e.requester;
-
-
 
             // Update the value under the slider.
             $('#progress-slider-value').html(e.duration);
@@ -483,7 +456,7 @@ $(function () {
 });
 
 // Buttons and events.
-$(function () {
+$(function() {
     // Delete current song from playlist button.
     $('#del-cur-playlist-button').on('click', () => {
         player.deleteFromPlaylist();
@@ -502,9 +475,6 @@ $(function () {
         player.updateState(2);
         // Skip the song.
         player.skipSong();
-
-        document.title = 'Kentobot Player - ' + player.temp.title + ' - ' + player.temp.requester;
-
     });
 
     // Mute button.
@@ -618,12 +588,6 @@ $(function () {
         player.shufflePlaylist();
     });
 
-    // Queue shuffle button.
-    $('#queue-shuffle-button').on('click', () => {
-        player.shuffleQueue();
-        toastr.info('Toggling shuffle mode');
-    });
-
     // Enable global tooltips.
     $('body').tooltip({
         selector: '[data-toggle="tooltip"]',
@@ -637,11 +601,21 @@ $(function () {
 });
 
 // Load other player settings.
-$(function () {
+$(function() {
     // Toastr options.
     toastr.options.progressBar = true;
     toastr.options.preventDuplicates = true;
 
     // Set the player size.
     helpers.setPlayerSize();
+    if (helpers.urlIsIP()) {
+        toaster.warning('You may be accessing the YouTube player by using an IP Address in the URL.<br/><br/>'
+            + 'YouTube\'s embed API really hates this and may refuse to work.<br/><br/>You should switch to using a '
+            + 'Hostname, Domain, or Sub-Domain to avoid issues.', 'Potential Conflict Detected',
+            {
+                timeOut: 60000,
+                extendedTimeOut: 120000,
+                closeButton: true
+            });
+    }
 });

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2018 phantombot.tv
+ * Copyright (C) 2016-2020 phantom.bot
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,13 +17,13 @@
 
 // Main function that gets all of our data.
 $(function() {
-	// Get all module toggles.
+    // Get all module toggles.
     socket.getDBValues('alerts_get_modules', {
         tables: ['modules', 'modules', 'modules', 'modules', 'modules', 'modules', 'modules', 'modules', 'modules', 'modules', 'modules', 'modules'],
         keys: ['./discord/handlers/followHandler.js', './discord/handlers/subscribeHandler.js', './discord/handlers/hostHandler.js',
-        		'./discord/handlers/bitsHandler.js', './discord/handlers/clipHandler.js', './discord/systems/greetingsSystem.js', './discord/handlers/streamlabsHandler.js',
-        		'./discord/handlers/raidHandler.js', './discord/handlers/tipeeeStreamHandler.js', './discord/handlers/streamElementsHandler.js',
-        		'./discord/handlers/twitterHandler.js', './discord/handlers/streamHandler.js']
+                './discord/handlers/bitsHandler.js', './discord/handlers/clipHandler.js', './discord/systems/greetingsSystem.js', './discord/handlers/streamlabsHandler.js',
+                './discord/handlers/raidHandler.js', './discord/handlers/tipeeeStreamHandler.js', './discord/handlers/streamElementsHandler.js',
+                './discord/handlers/twitterHandler.js', './discord/handlers/streamHandler.js']
     }, true, function(e) {
         // Handle the settings button.
         let keys = Object.keys(e),
@@ -45,7 +45,7 @@ $(function() {
 
 // Function that handles events
 $(function() {
-	// Toggle for the alert modules.
+    // Toggle for the alert modules.
     $('[data-alert-toggle]').on('change', function() {
         let name = $(this).attr('id'),
             checked = $(this).is(':checked');
@@ -264,7 +264,7 @@ $(function() {
 
     // Bits settings.
     $('#discordBitsHandlerSettings').on('click', function() {
-    	socket.getDBValues('discord_alerts_get_bits_settings', {
+        socket.getDBValues('discord_alerts_get_bits_settings', {
             tables: ['discordSettings', 'discordSettings', 'discordSettings'],
             keys: ['bitsToggle', 'bitsMessage', 'bitsChannel']
         }, true, function(e) {
@@ -279,7 +279,7 @@ $(function() {
                 'Message said when someone cheers in the the channel. Tags: (name), (message), and (amount)', false))
             // Add the box for the reward.
             .append(helpers.getInputGroup('bits-channel', 'text', 'Alert Channel', '#alerts', e.bitsChannel,
-             	'The channel the bits message is sent in.')),
+                'The channel the bits message is sent in.')),
             function() { // Callback once the user clicks save.
                 let bitsToggle = $('#bits-toggle').find(':selected').text() === 'Yes',
                     bitsMsg = $('#bits-message'),
@@ -292,7 +292,7 @@ $(function() {
                     default:
                         socket.updateDBValues('alerts_update_bits_settings', {
                             tables: ['discordSettings', 'discordSettings', 'discordSettings'],
-            				keys: ['bitsToggle', 'bitsMessage', 'bitsChannel'],
+                            keys: ['bitsToggle', 'bitsMessage', 'bitsChannel'],
                             values: [bitsToggle, bitsMsg.val(), bitsChan.val()]
                         }, function() {
                             socket.wsEvent('discord', './discord/handlers/bitsHandler.js', '', [], function() {
@@ -309,7 +309,7 @@ $(function() {
 
     // Clips handler.
     $('#discordClipHandlerSettings').on('click', function() {
-    	socket.getDBValues('alerts_get_clip_settings', {
+        socket.getDBValues('alerts_get_clip_settings', {
             tables: ['discordSettings', 'discordSettings', 'discordSettings'],
             keys: ['clipsToggle', 'clipsMessage', 'clipsChannel']
         }, true, function(e) {
@@ -337,7 +337,7 @@ $(function() {
                     default:
                         socket.updateDBValues('alerts_update_clip_settings', {
                             tables: ['discordSettings', 'discordSettings', 'discordSettings'],
-            				keys: ['clipsToggle', 'clipsMessage', 'clipsChannel'],
+                            keys: ['clipsToggle', 'clipsMessage', 'clipsChannel'],
                             values: [clipToggle, clipMsg.val(), clipsChan.val()]
                         }, function() {
                             socket.wsEvent('discord', './discord/handlers/clipHandler.js', '', [], function() {
@@ -356,9 +356,10 @@ $(function() {
     $('#discordStreamHandlerSettings').on('click', function() {
         socket.getDBValues('alerts_get_stream_settings', {
             tables: ['discordSettings', 'discordSettings', 'discordSettings', 'discordSettings',
-                    'discordSettings', 'discordSettings', 'discordSettings', 'discordSettings'],
-            keys: ['onlineToggle', 'onlineMessage', 'offlineToggle', 'offlineMessage', 'gameToggle',
-                'gameMessage', 'botGameToggle', 'onlineChannel']
+                     'discordSettings', 'discordSettings', 'discordSettings', 'discordSettings',
+                     'discordSettings'],
+            keys: ['onlineToggle', 'onlineMessage', 'offlineToggle', 'offlineMessage',
+                   'gameToggle', 'gameMessage', 'botGameToggle', 'onlineChannel', 'deleteMessageToggle']
         }, true, function(e) {
             helpers.getModal('stream-alert', 'Stream Alert Settings', 'Save', $('<form/>', {
                 'role': 'form'
@@ -372,80 +373,85 @@ $(function() {
             .append(helpers.getCollapsibleAccordion('main-1', 'Online Settings', $('<form/>', {
                     'role': 'form'
                 })
-            	// Add the toggle for onine alerts.
-            	.append(helpers.getDropdownGroup('online-toggle', 'Enable Online Alerts', (e.onlineToggle === 'true' ? 'Yes' : 'No'), ['Yes', 'No'],
-                	'If a message should be said in the channel when you go live on Twitch.'))
-            	// Add the toggle for one alerts.
-            	.append(helpers.getDropdownGroup('online-status', 'Enable Bot Status', (e.botGameToggle === 'true' ? 'Yes' : 'No'), ['Yes', 'No'],
-                	'Show your bot as streaming when you go live.'))
-            	// Add the text area for the online message.
-            	.append(helpers.getTextAreaGroup('online-message', 'text', 'Online Message', '', e.onlineMessage,
-                	'Message said when you go live. This message is in an embed style. Tags: (name)', false))))
+                // Add the toggle for online alerts.
+                .append(helpers.getDropdownGroup('online-toggle', 'Enable Online Alerts', (e.onlineToggle === 'true' ? 'Yes' : 'No'), ['Yes', 'No'],
+                    'If a message should be said in the channel when you go live on Twitch.'))
+                // Add the toggle for auto bot streaming status
+                .append(helpers.getDropdownGroup('online-status', 'Enable Bot Status', (e.botGameToggle === 'true' ? 'Yes' : 'No'), ['Yes', 'No'],
+                    'Show your bot as streaming when you go live.'))
+                // Add the text area for the online message.
+                .append(helpers.getTextAreaGroup('online-message', 'text', 'Online Message', '', e.onlineMessage,
+                    'Message said when you go live. This message is in an embed style. Tags: (name)', false))))
             // Append second collapsible accordion.
             .append(helpers.getCollapsibleAccordion('main-2', 'Offline Settings', $('<form/>', {
                     'role': 'form'
                 })
-            	// Add the toggle for offline alerts.
-            	.append(helpers.getDropdownGroup('offline-toggle', 'Enable Offline Alerts', (e.offlineToggle === 'true' ? 'Yes' : 'No'), ['Yes', 'No'],
-                	'If a message should be said in the channel when you go offline on Twitch.'))
-            	// Add the text area for the offline message.
-            	.append(helpers.getTextAreaGroup('offline-message', 'text', 'Offline Message', '', e.offlineMessage,
-                	'Message said when you go offline. This message is in an embed style. Tags: (name)', false))))
+                // Add the toggle for offline alerts.
+                .append(helpers.getDropdownGroup('offline-toggle', 'Enable Offline Alerts', (e.offlineToggle === 'true' ? 'Yes' : 'No'), ['Yes', 'No'],
+                    'If a message should be said in the channel when you go offline on Twitch.'))
+                // Add the text area for the offline message.
+                .append(helpers.getTextAreaGroup('offline-message', 'text', 'Offline Message', '', e.offlineMessage,
+                    'Message said when you go offline. This message is in an embed style. Tags: (name)', false))))
             // Append third collapsible accordion.
             .append(helpers.getCollapsibleAccordion('main-3', 'Game Change Settings', $('<form/>', {
                     'role': 'form'
                 })
-            	// Add the toggle for offline alerts.
-            	.append(helpers.getDropdownGroup('game-toggle', 'Enable Game Change Alerts', (e.gameToggle === 'true' ? 'Yes' : 'No'), ['Yes', 'No'],
-                	'If a message should be said in the channel when you switch games on Twitch.'))
-            	// Add the text area for the offline message.
-            	.append(helpers.getTextAreaGroup('game-message', 'text', 'Game Change Message', '', e.gameMessage,
-                	'Message said when you change games on Twitch. Tags: (name)', false))))
+                // Add the toggle for offline alerts.
+                .append(helpers.getDropdownGroup('game-toggle', 'Enable Game Change Alerts', (e.gameToggle === 'true' ? 'Yes' : 'No'), ['Yes', 'No'],
+                    'If a message should be said in the channel when you switch games on Twitch.'))
+                // Add the text area for the offline message.
+                .append(helpers.getTextAreaGroup('game-message', 'text', 'Game Change Message', '', e.gameMessage,
+                    'Message said when you change games on Twitch. Tags: (name)', false))))
             // Append forth collapsible accordion.
             .append(helpers.getCollapsibleAccordion('main-4', 'Alert Channel Settings', $('<form/>', {
                     'role': 'form'
                 })
                 // Add channel box.
                 .append(helpers.getInputGroup('channel-alert', 'text', 'Alert Channel', '#alerts', e.onlineChannel,
-                    'Channel where all alerts should go too.'))))),
+                    'Channel where all alerts should go too.'))
+                // Add the toggle for auto bot streaming status
+                .append(helpers.getDropdownGroup('delete-message', 'Delete alerts automatically', (e.deleteMessageToggle === 'true' ? 'Yes' : 'No'), ['Yes', 'No'],
+                  'Automatically delete the online message after the stream ends and the offline message when a new stream starts.'))))),
             function() {
-            	let onlineToggle = $('#online-toggle').find(':selected').text() === 'Yes',
-            		statusToggle = $('#online-status').find(':selected').text() === 'Yes',
-            		onlineMessage = $('#online-message'),
-            		offlineToggle = $('#offline-toggle').find(':selected').text() === 'Yes',
-            		offlineMessage = $('#offline-message'),
-            		gameToggle = $('#game-toggle').find(':selected').text() === 'Yes',
-            		gameMessage = $('#game-message'),
-            		channel = $('#channel-alert');
+                let onlineToggle = $('#online-toggle').find(':selected').text() === 'Yes',
+                    statusToggle = $('#online-status').find(':selected').text() === 'Yes',
+                    onlineMessage = $('#online-message'),
+                    offlineToggle = $('#offline-toggle').find(':selected').text() === 'Yes',
+                    offlineMessage = $('#offline-message'),
+                    gameToggle = $('#game-toggle').find(':selected').text() === 'Yes',
+                    gameMessage = $('#game-message'),
+                    channel = $('#channel-alert'),
+                    deleteMessageToggle = $('#delete-message').find(':selected').text() === 'Yes';
 
-            	switch (false) {
-            		case helpers.handleInputString(onlineMessage):
-            		case helpers.handleInputString(offlineMessage):
-            		case helpers.handleInputString(gameMessage):
-            			break;
-            		default:
-            			socket.updateDBValues('discord_stream_alerts_updater', {
-            				tables: ['discordSettings', 'discordSettings', 'discordSettings', 'discordSettings',
-                    				'discordSettings', 'discordSettings', 'discordSettings', 'discordSettings'],
-            				keys: ['onlineToggle', 'onlineMessage', 'offlineToggle', 'offlineMessage', 'gameToggle',
-                				'gameMessage', 'botGameToggle', 'onlineChannel'],
-            				values: [onlineToggle, onlineMessage.val(), offlineToggle, offlineMessage.val(),
-            						gameToggle, gameMessage.val(), statusToggle, channel.val()]
-            			}, function() {
-            				socket.wsEvent('discord', './discord/handlers/streamHandler.js', '', [], function() {
+                switch (false) {
+                    case helpers.handleInputString(onlineMessage):
+                    case helpers.handleInputString(offlineMessage):
+                    case helpers.handleInputString(gameMessage):
+                        break;
+                    default:
+                        socket.updateDBValues('discord_stream_alerts_updater', {
+                            tables: ['discordSettings', 'discordSettings', 'discordSettings', 'discordSettings',
+                                    'discordSettings', 'discordSettings', 'discordSettings', 'discordSettings',
+                                    'discordSettings',],
+                            keys: ['onlineToggle', 'onlineMessage', 'offlineToggle', 'offlineMessage',
+                                'gameToggle', 'gameMessage', 'botGameToggle', 'onlineChannel', 'deleteMessageToggle'],
+                            values: [onlineToggle, onlineMessage.val(), offlineToggle, offlineMessage.val(),
+                                    gameToggle, gameMessage.val(), statusToggle, channel.val(), deleteMessageToggle]
+                        }, function() {
+                            socket.wsEvent('discord', './discord/handlers/streamHandler.js', '', [], function() {
                                 // Close the modal.
                                 $('#stream-alert').modal('toggle');
                                 // Alert the user.
                                 toastr.success('Successfully updated stream alert settings!');
                             });
-            			});
-            	}
+                        });
+                }
             }).modal('toggle');
         });
     });
 
-	// Greetings alerts.
-	$('#discordGreetingsSystemSettings').on('click', function() {
+    // Greetings alerts.
+    $('#discordGreetingsSystemSettings').on('click', function() {
         socket.getDBValues('alerts_get_greetings_settings', {
             tables: ['discordSettings', 'discordSettings', 'discordSettings', 'discordSettings',
                     'discordSettings', 'discordSettings'],
@@ -522,7 +528,7 @@ $(function() {
                 }
             }).modal('toggle');
         });
-	});
+    });
 
     // StreamLabs settings.
     $('#discordStreamlabsHandlerSettings').on('click', function() {

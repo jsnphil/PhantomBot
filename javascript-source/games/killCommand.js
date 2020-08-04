@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2018 phantombot.tv
+ * Copyright (C) 2016-2020 phantom.bot
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
      * @function reloadKill
      */
     function reloadKill() {
-    	jailTimeout = $.getIniDbNumber('settings', 'killTimeoutTime', 60);
+        jailTimeout = $.getIniDbNumber('settings', 'killTimeoutTime', 60);
     }
 
     /**
