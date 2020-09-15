@@ -14,11 +14,11 @@
 -->
 
 <main>
-    <style>
-        .table>tbody>tr>th {
-            border: none !important;
-        }
-    </style>
+	<style>
+		.table>tbody>tr>th {
+			border: none !important;
+		}
+	</style>
     <!-- Header -->
     <section class="content-header">
         <!-- Page title and switch toggle. -->
@@ -39,7 +39,7 @@
     <!-- Main content -->
     <section class="content">
         <div class="row">
-            <!-- Left section -->
+        	<!-- Left section -->
             <div class="col-md-3" id="raffleTable">
                 <div class="box box-solid">
                     <div class="box-header with-border">
@@ -51,7 +51,7 @@
                         <div class="box-body no-padding" style="height: 569px; overflow-x: auto; overflow-y: auto;">
                             <div id="raffle-list">
                                 <table class="table table-hover table-custom" id="raffle-table" style="width: 100%;">
-                                    <tr>
+                                	<tr>
                                         <th style="width: 100%;">Username</th>
                                     </tr>
                                 </table>
@@ -67,16 +67,16 @@
                     <div class="box-header with-border">
                         <h3 class="box-title">Raffle Options</h3>
                         <span class="pull-right">
-                            <a href="javascript:void(0)" class="text-muted" data-toggle="tooltip" title="Raffle settings" id="raffle-settings">
-                                <i class="fa fa-gears"></i>
-                            </a>
+                        	<a href="javascript:void(0)" class="text-muted" data-toggle="tooltip" title="Raffle settings" id="raffle-settings">
+                        		<i class="fa fa-gears"></i>
+                        	</a>
                         </span>
                     </div>
 
                     <form role="form" id="raffleModal">
                         <!-- Box content -->
                         <div class="box-body" style="padding-bottom: 90px;">
-                            <!-- Keyword -->
+                        	<!-- Keyword -->
                             <div class="form-group">
                                 <lable>Keyword</lable>
                                 <input type="text" class="form-control" id="raffle-keyword" placeholder="!enter"
@@ -85,32 +85,32 @@
 
                             <!-- Cost -->
                             <div class="row">
-                                <div class="col-md-8">
-                                    <div class="form-group">
-                                        <lable id="raffle-cost-title">Cost</lable>
-                                        <input type="text" class="form-control" id="raffle-cost" value="0"
-                                            data-toggle="tooltip" title="Cost required to enter the raffle. When using time, it will not be deducted from the user."/>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <lable>Requirement</lable>
-                                        <select class="form-control" id="raffle-req" data-toggle="tooltip" title="If the raffle system should use points or time.">
-                                            <option selected="selected" value="-usepoints">Points</option>
-                                            <option value="-usetime">Time</option>
-                                        </select>
-                                    </div>
-                                </div>
+                            	<div class="col-md-8">
+                            		<div class="form-group">
+                            		    <lable id="raffle-cost-title">Cost</lable>
+                            		    <input type="text" class="form-control" id="raffle-cost" value="0"
+                            		        data-toggle="tooltip" title="Cost required to enter the raffle. When using time, it will not be deducted from the user."/>
+                            		</div>
+                            	</div>
+                            	<div class="col-md-4">
+                            		<div class="form-group">
+                            			<lable>Requirement</lable>
+                            			<select class="form-control" id="raffle-req" data-toggle="tooltip" title="If the raffle system should use points or time.">
+  											<option selected="selected" value="-usepoints">Points</option>
+  											<option value="-usetime">Time</option>
+										</select>
+                            		</div>
+                            	</div>
                             </div>
 
                             <!-- Eligibility -->
                             <div class="form-group">
-                                <lable>Eligibility</lable>
-                                <select class="form-control" id="raffle-perm">
-                                    <option value="-subscribers">Subscribers</option>
-                                    <option value="-followers">Followers</option>
-                                    <option selected="selected" value="">Everyone</option>
-                                </select>
+                            	<lable>Eligibility</lable>
+                            	<select class="form-control" id="raffle-perm">
+  									<option value="-subscribers">Subscribers</option>
+  									<option value="-followers">Followers</option>
+  									<option selected="selected" value="">Everyone</option>
+								</select>
                             </div>
 
                             <!-- Timer -->
@@ -137,11 +137,11 @@
 
                         <!-- Footer with buttons -->
                         <div class="box-footer">
-                            <div class="btn-toolbar pull-right">
-                                <button class="btn btn-success" type="button" id="open-or-close-raffle"><i class="fa fa-unlock-alt"></i>&nbsp; Open</button>
-                                <button class="btn btn-primary" type="button" id="draw-raffle"><i class="fa fa-trophy"></i>&nbsp; Draw</button>
-                                <button class="btn btn-danger" type="button" id="reset-raffle"><i class="fa fa-trash"></i>&nbsp; Reset</button>
-                            </div>
+                        	<div class="btn-toolbar pull-right">
+                        		<button class="btn btn-success" type="button" id="open-or-close-raffle"><i class="fa fa-unlock-alt"></i>&nbsp; Open</button>
+                        		<button class="btn btn-primary" type="button" id="draw-raffle"><i class="fa fa-trophy"></i>&nbsp; Draw</button>
+                        	    <button class="btn btn-danger" type="button" id="reset-raffle"><i class="fa fa-trash"></i>&nbsp; Reset</button>
+                        	</div>
                         </div>
                     </form>
                 </div>

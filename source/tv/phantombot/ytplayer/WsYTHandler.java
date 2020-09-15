@@ -51,6 +51,7 @@ import tv.phantombot.event.ytplayer.YTPlayerLoadPlaylistEvent;
 import tv.phantombot.event.ytplayer.YTPlayerRandomizeEvent;
 import tv.phantombot.event.ytplayer.YTPlayerRequestCurrentSongEvent;
 import tv.phantombot.event.ytplayer.YTPlayerRequestPlaylistEvent;
+import tv.phantombot.event.ytplayer.YTPlayerRequestSongHistoryEvent;
 import tv.phantombot.event.ytplayer.YTPlayerRequestSonglistEvent;
 import tv.phantombot.event.ytplayer.YTPlayerSkipSongEvent;
 import tv.phantombot.event.ytplayer.YTPlayerSongRequestEvent;
@@ -210,7 +211,7 @@ public class WsYTHandler implements WsFrameHandler {
                     setCurrentState(dataInt);
 
                     if (bufferCounter++ == 3) {
-                        EventBus.instance().postAsync(new YTPlayerSkipSongEvent());
+//                        EventBus.instance().postAsync(new YTPlayerSkipSongEvent());
                         bufferCounter = 0;
                     }
                 } else {
@@ -236,7 +237,7 @@ public class WsYTHandler implements WsFrameHandler {
             } else if (jsonStatus.has("errorcode")) {
                 dataInt = jsonStatus.getInt("errorcode");
                 com.gmt2001.Console.err.println("Skipping song, YouTube has thrown an error: " + dataInt);
-                EventBus.instance().postAsync(new YTPlayerSkipSongEvent());
+//                EventBus.instance().postAsync(new YTPlayerSkipSongEvent());
             }
         } catch (JSONException ex) {
             com.gmt2001.Console.err.logStackTrace(ex);
@@ -291,6 +292,9 @@ public class WsYTHandler implements WsFrameHandler {
                         break;
                     case "currentsong":
                         EventBus.instance().postAsync(new YTPlayerRequestCurrentSongEvent());
+                        break;
+                    case "songrequesthistory":
+                        EventBus.instance().postAsync(new YTPlayerRequestSongHistoryEvent());
                         break;
                     default:
                         break;

@@ -39,7 +39,7 @@
     /*
      * @event twitchClip
      */
-    $.bind('twitchClip', function(event) {
+	$.bind('twitchClip', function(event) {
         var creator = event.getCreator(),
             url = event.getClipURL(),
             title = event.getClipTitle(),

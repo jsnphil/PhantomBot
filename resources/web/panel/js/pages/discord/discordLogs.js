@@ -35,28 +35,28 @@ $(function() {
 $(function() {
     // Save button.
     $('#discord-logging-save').on('click', function() {
-        let moderationLogs = $('#twitch-mod-log').find(':selected').text() === 'Yes',
-            customCommandLog = $('#twitch-command-log').find(':selected').text() === 'Yes',
-            logChannel = $('#twitch-mod-channel');
+    	let moderationLogs = $('#twitch-mod-log').find(':selected').text() === 'Yes',
+    		customCommandLog = $('#twitch-command-log').find(':selected').text() === 'Yes',
+    		logChannel = $('#twitch-mod-channel');
 
-        // Make sure all settings are entered corretly.
-        switch (false) {
-            case helpers.handleInputString(logChannel):
-                break;
-            default:
-                socket.updateDBValues('discord_logs_update', {
-                    tables: ['discordSettings', 'discordSettings', 'discordSettings', 'chatModerator'],
-                    keys: ['modLogs', 'customCommandLogs', 'modLogChannel', 'moderationLogs'],
-                    values: [moderationLogs, customCommandLog, logChannel.val(), moderationLogs]
-                }, function() {
-                    // Update the scripts variables.
-                    socket.wsEvent('discord_logs', './core/logging.js', '', [], function() {
+    	// Make sure all settings are entered corretly.
+    	switch (false) {
+    	    case helpers.handleInputString(logChannel):
+    	    	break;
+    	    default:
+    	    	socket.updateDBValues('discord_logs_update', {
+    	    		tables: ['discordSettings', 'discordSettings', 'discordSettings', 'chatModerator'],
+        			keys: ['modLogs', 'customCommandLogs', 'modLogChannel', 'moderationLogs'],
+    	    		values: [moderationLogs, customCommandLog, logChannel.val(), moderationLogs]
+    	    	}, function() {
+    	    		// Update the scripts variables.
+    	    		socket.wsEvent('discord_logs', './core/logging.js', '', [], function() {
                         socket.sendCommand('moderation_reload_settings', 'reloadmoderation', function () {
-                            // Alert the user.
-                            toastr.success('Successfully updated the logs settings!');
+    	    			    // Alert the user.
+    	    			    toastr.success('Successfully updated the logs settings!');
                         });
-                    });
-                });
-        }
+    	    		});
+    	    	});
+    	}
     });
 });

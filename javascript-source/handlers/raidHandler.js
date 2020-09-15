@@ -211,8 +211,6 @@
             }
 
             $.say(message);
-            $.autoBump(username);
-
         }
 
         // Add reward.
@@ -222,6 +220,8 @@
 
         // Save the raid to the database.
         saveRaidFromUsername(username + '', viewers + '');
+
+        $.autoBump(username, "paid", "raid");
     });
 
     /*

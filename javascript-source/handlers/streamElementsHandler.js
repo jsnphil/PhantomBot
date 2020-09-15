@@ -130,9 +130,6 @@
             }
 
             $.say(s);
-            if (donationAmount > 3) {
-                $.autoBump(donationUsername);
-            }
         }
 
         if (reward > 0) {

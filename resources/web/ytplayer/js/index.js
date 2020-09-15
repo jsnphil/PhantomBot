@@ -26,9 +26,9 @@
  * For more functions under the "player" object, take a look at the socket.js script.
  * You can also generate modals with jQuery, see util/helpers.js for more information.
  */
-$(function() {
+$(function () {
     var cluster = null,
-        timer = null;
+            timer = null;
 
     /*
      * @function Loads the player page.
@@ -84,7 +84,8 @@ $(function() {
                         }
                     }).modal('toggle');
                 });
-            }).modal('toggle');;
+            }).modal('toggle');
+            ;
         }
     };
 
@@ -115,7 +116,7 @@ $(function() {
         // Add a listener to load the main playlist.
         player.addListener('playlist', (e) => {
             let table = [],
-                playlist = e.playlist;
+                    playlist = e.playlist;
 
             // Set the playlist name.
             $('#playlist-name').html('(' + e.playlistname + ')');
@@ -224,7 +225,7 @@ $(function() {
         // Add a listener for the songrequest queue.
         player.addListener('songlist', (e) => {
             let table = $('#queue-table-content'),
-                songlist = e.songlist;
+                    songlist = e.songlist;
 
             // Remove the current data from the table.
             table.find('tr:gt(0)').remove();
@@ -233,9 +234,24 @@ $(function() {
                 let row = $('<tr/>');
 
                 // Add position.
-                row.append($('<td/>', {
-                    'text': i
-                }));
+                if (songlist[i].bump == "true") {
+                    row.append($('<td/>', {
+                        'html': $('<i/>', {
+                            'class': 'fas fa-star'
+                        })
+                    }));
+                } else if (songlist[i].shuffle == "true") {
+                    row.append($('<td/>', {
+                        'html': $('<i/>', {
+                            'class': 'fas fa-dice'
+                        })
+                    }));
+                } else {
+                    // Add position.
+                    row.append($('<td/>', {
+                        'text': i + 1
+                    }));
+                }
 
                 // Add song name.
                 row.append($('<td/>', {
@@ -272,6 +288,7 @@ $(function() {
                             player.removeSongFromRequest($(e.currentTarget).data('song'));
                             // Hide the tooltip, or could stay opened.
                             $(e.currentTarget).tooltip('hide');
+                            document.title = 'Kentobot Player - ' + songlist[i].title + ' - ' + songlist[i].requester;
                         }
                     })).append($('<button/>', {
                         'type': 'button',
@@ -357,8 +374,11 @@ $(function() {
                 toastr.info('Song queued: ' + (e.title.length > 30 ? e.title.substring(0, 30) + '...' : e.title));
             } else {
                 player.API.loadVideoById(e.play, 0, 'medium');
-                toastr.success('Now playing: ' +  (e.title.length > 30 ? e.title.substring(0, 30) + '...' : e.title));
+                toastr.success('Now playing: ' + (e.title.length > 30 ? e.title.substring(0, 30) + '...' : e.title));
             }
+
+            document.title = 'Kentobot Player - ' + e.title + ' - ' + e.requester;
+
 
             // Update the value under the slider.
             $('#progress-slider-value').html(e.duration);
@@ -456,7 +476,7 @@ $(function() {
 });
 
 // Buttons and events.
-$(function() {
+$(function () {
     // Delete current song from playlist button.
     $('#del-cur-playlist-button').on('click', () => {
         player.deleteFromPlaylist();
@@ -601,7 +621,7 @@ $(function() {
 });
 
 // Load other player settings.
-$(function() {
+$(function () {
     // Toastr options.
     toastr.options.progressBar = true;
     toastr.options.preventDuplicates = true;
@@ -610,12 +630,12 @@ $(function() {
     helpers.setPlayerSize();
     if (helpers.urlIsIP()) {
         toaster.warning('You may be accessing the YouTube player by using an IP Address in the URL.<br/><br/>'
-            + 'YouTube\'s embed API really hates this and may refuse to work.<br/><br/>You should switch to using a '
-            + 'Hostname, Domain, or Sub-Domain to avoid issues.', 'Potential Conflict Detected',
-            {
-                timeOut: 60000,
-                extendedTimeOut: 120000,
-                closeButton: true
-            });
+                + 'YouTube\'s embed API really hates this and may refuse to work.<br/><br/>You should switch to using a '
+                + 'Hostname, Domain, or Sub-Domain to avoid issues.', 'Potential Conflict Detected',
+                {
+                    timeOut: 60000,
+                    extendedTimeOut: 120000,
+                    closeButton: true
+                });
     }
 });

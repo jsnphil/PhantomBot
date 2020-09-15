@@ -22,28 +22,34 @@
 
 (function () {
     var transferToggle = $.getSetIniDbBoolean('channelPointsSettings', 'transferToggle', false),
-        transferAmount = $.getSetIniDbNumber('channelPointsSettings', 'transferAmount', 0),
-        transferID = $.getSetIniDbString('channelPointsSettings', 'transferID', 'noIDSet'),
-        transferConfig = $.getSetIniDbBoolean('channelPointsSettings', 'transferConfig', false),
-        transferReward = $.getSetIniDbString('channelPointsSettings', 'transferReward', 'noNameSet'),
-        giveAllToggle = $.getSetIniDbBoolean('channelPointsSettings', 'giveAllToggle', false),
-        giveAllAmount = $.getSetIniDbNumber('channelPointsSettings', 'giveAllAmount', 0),
-        giveAllID = $.getSetIniDbString('channelPointsSettings', 'giveAllID', 'noIDSet'),
-        giveAllConfig = $.getSetIniDbBoolean('channelPointsSettings', 'giveAllConfig', false),
-        giveAllReward = $.getSetIniDbString('channelPointsSettings', 'giveAllReward', 'noNameSet'),
-        emoteOnlyToggle = $.getSetIniDbBoolean('channelPointsSettings', 'emoteOnlyToggle', false),
-        emoteOnlyDuration = $.getSetIniDbNumber('channelPointsSettings', 'emoteOnlyDuration', 0),
-        emoteOnlyID = $.getSetIniDbString('channelPointsSettings', 'emoteOnlyID', 'noIDSet'),
-        emoteOnlyConfig = $.getSetIniDbBoolean('channelPointsSettings', 'emoteOnlyConfig', false),
-        emoteOnlyReward = $.getSetIniDbString('channelPointsSettings', 'emoteOnlyReward', 'noNameSet'),
-        emoteOnlyStart = $.systemTime(),
-        emoteOnlyMode = $.getSetIniDbBoolean('channelPointsSettings', 'timeoutToggle', false),
-        timeoutToggle = $.getSetIniDbBoolean('channelPointsSettings', 'timeoutToggle', false),
-        timeoutDuration = $.getSetIniDbNumber('channelPointsSettings', 'timeoutDuration', 0),
-        timeoutID = $.getSetIniDbString('channelPointsSettings', 'timeoutID', 'noIDSet'),
-        timeoutConfig = $.getSetIniDbBoolean('channelPointsSettings', 'timeoutConfig', false),
-        timeoutReward = $.getSetIniDbString('channelPointsSettings', 'timeoutReward', 'noNameSet'),
-        pointName = $.pointNameMultiple;
+            transferAmount = $.getSetIniDbNumber('channelPointsSettings', 'transferAmount', 0),
+            transferID = $.getSetIniDbString('channelPointsSettings', 'transferID', 'noIDSet'),
+            transferConfig = $.getSetIniDbBoolean('channelPointsSettings', 'transferConfig', false),
+            transferReward = $.getSetIniDbString('channelPointsSettings', 'transferReward', 'noNameSet'),
+            giveAllToggle = $.getSetIniDbBoolean('channelPointsSettings', 'giveAllToggle', false),
+            giveAllAmount = $.getSetIniDbNumber('channelPointsSettings', 'giveAllAmount', 0),
+            giveAllID = $.getSetIniDbString('channelPointsSettings', 'giveAllID', 'noIDSet'),
+            giveAllConfig = $.getSetIniDbBoolean('channelPointsSettings', 'giveAllConfig', false),
+            giveAllReward = $.getSetIniDbString('channelPointsSettings', 'giveAllReward', 'noNameSet'),
+            emoteOnlyToggle = $.getSetIniDbBoolean('channelPointsSettings', 'emoteOnlyToggle', false),
+            emoteOnlyDuration = $.getSetIniDbNumber('channelPointsSettings', 'emoteOnlyDuration', 0),
+            emoteOnlyID = $.getSetIniDbString('channelPointsSettings', 'emoteOnlyID', 'noIDSet'),
+            emoteOnlyConfig = $.getSetIniDbBoolean('channelPointsSettings', 'emoteOnlyConfig', false),
+            emoteOnlyReward = $.getSetIniDbString('channelPointsSettings', 'emoteOnlyReward', 'noNameSet'),
+            emoteOnlyStart = $.systemTime(),
+            emoteOnlyMode = $.getSetIniDbBoolean('channelPointsSettings', 'timeoutToggle', false),
+            timeoutToggle = $.getSetIniDbBoolean('channelPointsSettings', 'timeoutToggle', false),
+            timeoutDuration = $.getSetIniDbNumber('channelPointsSettings', 'timeoutDuration', 0),
+            timeoutID = $.getSetIniDbString('channelPointsSettings', 'timeoutID', 'noIDSet'),
+            timeoutConfig = $.getSetIniDbBoolean('channelPointsSettings', 'timeoutConfig', false),
+            timeoutReward = $.getSetIniDbString('channelPointsSettings', 'timeoutReward', 'noNameSet'),
+            pointName = $.pointNameMultiple,
+            vibesId = '10ab0f43-07b9-41a5-aa44-a78e0ff2cc9f',
+            songBumpId = '4e99f574-15a4-4dc2-a5f9-a1f90900c491',
+            hydrateId = '77e01635-bec3-4657-8351-c8aee3eb0f8c',
+            rightHandOnlyId = '9db1ff6f-818b-41e0-9922-4f217ac4c666',
+            leftHandOnlyId = '6697b762-d02d-45d0-9e5c-a4a36f037a47',
+            blindId = 'be6d17cd-f334-4634-a159-e4cfdd8156f9';
 
     /*
      * @function updateChannelPointsConfig
@@ -60,7 +66,7 @@
         giveAllConfig = $.getIniDbBoolean('channelPointsSettings', 'giveAllConfig', false);
         giveAllReward = $.getIniDbString('channelPointsSettings', 'giveAllReward', 'noNameSet');
         emoteOnlyMode = $.getIniDbBoolean('channelPointsSettings', 'timeoutToggle', false),
-        emoteOnlyToggle = $.getIniDbBoolean('channelPointsSettings', 'emoteOnlyToggle', false);
+                emoteOnlyToggle = $.getIniDbBoolean('channelPointsSettings', 'emoteOnlyToggle', false);
         emoteOnlyDuration = $.getIniDbNumber('channelPointsSettings', 'emoteOnlyDuration', 0);
         emoteOnlyID = $.getIniDbString('channelPointsSettings', 'emoteOnlyID', 'noIDSet');
         emoteOnlyConfig = $.getIniDbBoolean('channelPointsSettings', 'emoteOnlyConfig', false);
@@ -77,9 +83,9 @@
      */
     $.bind('command', function (event) {
         var sender = event.getSender(),
-            command = event.getCommand(),
-            args = event.getArgs(),
-            action = args[0];
+                command = event.getCommand(),
+                args = event.getArgs(),
+                action = args[0];
 
         if (command.equalsIgnoreCase('channelpoints')) {
             if (action === undefined) {
@@ -148,7 +154,7 @@
                 if (args[1].equalsIgnoreCase('config')) {
                     transferConfig = !transferConfig;
                     $.setIniDbBoolean('channelPointsSettings', 'transferConfig', transferConfig);
-                    if (transferConfig === true){
+                    if (transferConfig === true) {
                         $.say($.whisperPrefix(sender) + $.lang.get('channelPointsHandler.transfer.config.start'));
                         transferID = 'noIDSet';
                         transferReward = 'noNameSet';
@@ -166,7 +172,7 @@
                  */
                 if (args[1].equalsIgnoreCase('amount')) {
                     if (args[2] === undefined) {
-                        if (transferAmount === 0){
+                        if (transferAmount === 0) {
                             $.say($.whisperPrefix(sender) + $.lang.get('channelPointsHandler.transfer.amount.notset'));
                             return;
                         }
@@ -186,12 +192,12 @@
                  * @commandpath transfer toggle
                  */
                 if (args[1].equalsIgnoreCase('toggle')) {
-                    if (transferToggle === false){
+                    if (transferToggle === false) {
                         if (transferID.equals('noIDSet')) {
                             $.say($.whisperPrefix(sender) + $.lang.get('channelPointsHandler.transfer.toggle.id'));
                             return;
                         }
-                        if (transferAmount === 0){
+                        if (transferAmount === 0) {
                             $.say($.whisperPrefix(sender) + $.lang.get('channelPointsHandler.transfer.toggle.amount'));
                             return;
                         }
@@ -312,7 +318,7 @@
                 if (args[1].equalsIgnoreCase('config')) {
                     emoteOnlyConfig = !emoteOnlyConfig;
                     $.setIniDbBoolean('channelPointsSettings', 'emoteOnlyConfig', emoteOnlyConfig);
-                    if (emoteOnlyConfig === true){
+                    if (emoteOnlyConfig === true) {
                         $.say($.whisperPrefix(sender) + $.lang.get('channelPointsHandler.emoteonly.config.start'));
                         emoteOnlyID = 'noIDSet';
                         emoteOnlyReward = 'noNameSet';
@@ -330,7 +336,7 @@
                  */
                 if (args[1].equalsIgnoreCase('duration')) {
                     if (args[2] === undefined) {
-                        if (emoteOnlyDuration === 0){
+                        if (emoteOnlyDuration === 0) {
                             $.say($.whisperPrefix(sender) + $.lang.get('channelPointsHandler.emoteonly.duration.notset'));
                             return;
                         }
@@ -350,12 +356,12 @@
                  * @commandpath emoteonly toggle
                  */
                 if (args[1].equalsIgnoreCase('toggle')) {
-                    if (emoteOnlyToggle === false){
+                    if (emoteOnlyToggle === false) {
                         if (emoteOnlyID.equals('noIDSet')) {
                             $.say($.whisperPrefix(sender) + $.lang.get('channelPointsHandler.emoteonly.toggle.id'));
                             return;
                         }
-                        if (emoteOnlyDuration === 0){
+                        if (emoteOnlyDuration === 0) {
                             $.say($.whisperPrefix(sender) + $.lang.get('channelPointsHandler.emoteonly.toggle.duration'));
                             return;
                         }
@@ -396,7 +402,7 @@
                 if (args[1].equalsIgnoreCase('config')) {
                     timeoutConfig = !timeoutConfig;
                     $.setIniDbBoolean('channelPointsSettings', 'timeoutConfig', timeoutConfig);
-                    if (timeoutConfig === true){
+                    if (timeoutConfig === true) {
                         $.say($.whisperPrefix(sender) + $.lang.get('channelPointsHandler.timeout.config.start'));
                         timeoutID = 'noIDSet';
                         timeoutReward = 'noNameSet';
@@ -414,7 +420,7 @@
                  */
                 if (args[1].equalsIgnoreCase('duration')) {
                     if (args[2] === undefined) {
-                        if (timeoutDuration === 0){
+                        if (timeoutDuration === 0) {
                             $.say($.whisperPrefix(sender) + $.lang.get('channelPointsHandler.timeout.duration.notset'));
                             return;
                         }
@@ -434,12 +440,12 @@
                  * @commandpath timeout toggle
                  */
                 if (args[1].equalsIgnoreCase('toggle')) {
-                    if (timeoutToggle === false){
+                    if (timeoutToggle === false) {
                         if (timeoutID.equals('noIDSet')) {
                             $.say($.whisperPrefix(sender) + $.lang.get('channelPointsHandler.timeout.toggle.id'));
                             return;
                         }
-                        if (timeoutDuration === 0){
+                        if (timeoutDuration === 0) {
                             $.say($.whisperPrefix(sender) + $.lang.get('channelPointsHandler.timeout.toggle.duration'));
                             return;
                         }
@@ -459,17 +465,41 @@
      */
     $.bind('PubSubChannelPoints', function (event) {
         var redemptionID = event.getRedemptionID(),
-            rewardID = event.getRewardID(),
-            userID = event.getUserID(),
-            username = event.getUsername(),
-            displayName = event.getDisplayName(),
-            rewardTitle = event.getRewardTitle(),
-            cost = event.getCost(),
-            inputPromt = event.getInputPrompt(),
-            userInput = event.getUserInput(),
-            fulfillmentStatus = event.getFulfillmentStatus();
+                rewardID = event.getRewardID(),
+                userID = event.getUserID(),
+                username = event.getUsername(),
+                displayName = event.getDisplayName(),
+                rewardTitle = event.getRewardTitle(),
+                cost = event.getCost(),
+                inputPromt = event.getInputPrompt(),
+                userInput = event.getUserInput(),
+                fulfillmentStatus = event.getFulfillmentStatus();
 
         com.gmt2001.Console.debug.println("Channel point event " + rewardTitle + " parsed to javascript." + " ID is: " + rewardID);
+        $.log.file('channel-points', "Channel point event " + rewardTitle + " parsed to javascript." + " ID is: " + rewardID);
+
+        if (rewardID.equalsIgnoreCase(songBumpId)) {
+            $.log.file('queue-management', 'Checking database for existing bump data');
+            var bumpObj = JSON.parse($.getIniDbString('bumps', username, '{}'));
+
+            if (bumpObj.hasOwnProperty('fulfilled')) {
+                bumpFulfilled = (bumpObj.fulfilled == 'true');
+            } else {
+                bumpFulfilled = false;
+            }
+
+            if (bumpFulfilled) {
+                $.say($.whisperPrefix(username) + $.lang.get('songqueuemgmt.autobump.free.used'));
+            } else {
+                var request = $.getUserRequest(username);
+                if (request != null) {
+                    $.autoBump(username, 'free', 'points');
+                } else {
+                    $.say($.whisperPrefix(username) + $.lang.get('songqueuemgmt.autobump.channelpoints.404'));
+                }
+            }
+        }
+
 
         /*
          * reward ID config
@@ -508,7 +538,7 @@
         }
 
         if (timeoutConfig === true) {
-            if (userInput.equals('')){
+            if (userInput.equals('')) {
                 $.say($.lang.get('channelPointsHandler.timeout.nouserinput'));
                 timeoutConfig = false;
                 $.setIniDbBoolean('channelPointsSettings', 'timeoutConfig', timeoutConfig);
@@ -527,13 +557,12 @@
         /*
          * transfer
          */
-        if (rewardID.equals(transferID)){
-            if (transferToggle === true){
+        if (rewardID.equals(transferID)) {
+            if (transferToggle === true) {
                 com.gmt2001.Console.debug.println("transferRunStart");
-                if (transferAmount < 2){
+                if (transferAmount < 2) {
                     pointName = $.pointNameSingle;
-                }
-                else{
+                } else {
                     pointName = $.pointNameMultiple;
                 }
                 $.inidb.incr('points', username, transferAmount);
@@ -545,8 +574,8 @@
         /*
          * give all
          */
-        if (rewardID.equals(giveAllID)){
-            if (giveAllToggle === true){
+        if (rewardID.equals(giveAllID)) {
+            if (giveAllToggle === true) {
                 com.gmt2001.Console.debug.println("giveAllRunStart");
                 $.giveAll(giveAllAmount, displayName);
                 return;
@@ -556,8 +585,8 @@
         /*
          * emote only
          */
-        if (rewardID.equals(emoteOnlyID)){
-            if (emoteOnlyToggle ===true){
+        if (rewardID.equals(emoteOnlyID)) {
+            if (emoteOnlyToggle === true) {
                 com.gmt2001.Console.debug.println("emoteOnlyRunStart" + emoteOnlyDuration);
                 $.say('/emoteonly');
                 setTimeout(emoteOnlyOff, emoteOnlyDuration * 1e3);
@@ -568,7 +597,7 @@
         /*
          * timeout
          */
-        if (rewardID.equals(timeoutID)){
+        if (rewardID.equals(timeoutID)) {
             if (timeoutToggle === true) {
                 com.gmt2001.Console.debug.println("timeoutRunStart");
                 userInput = $.user.sanitize(userInput);
@@ -602,6 +631,6 @@
 /*
  * exit emote only mode after required time
  */
-function emoteOnlyOff(){
+function emoteOnlyOff() {
     $.say('/emoteonlyoff')
 }

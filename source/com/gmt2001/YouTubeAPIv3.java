@@ -185,29 +185,29 @@ public class YouTubeAPIv3 {
             q = matcher.group(1);
         }
 
-        JSONObject j = GetData(request_type.GET, "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=" + q + "&format=json");
-        if (j.getBoolean("_success") && !j.toString().contains("Bad Request") && !j.toString().contains("Not Found")) {
-            if (j.toString().contains("Unauthorized")) {
-                com.gmt2001.Console.debug.println("URL Check Returned Unauthorized (Video Marked Private)");
-
-                return new String[] { q, "Video Marked Private", "" };
-            }
-
-            if (j.getInt("_http") == 200) {
-                try {
-                    com.gmt2001.Console.debug.println("URL Check Success");
-
-                    String a = j.getString("title");
-                    return new String[] { q, a, "" };
-                } catch (Exception e) {
-                    com.gmt2001.Console.debug.println("Exception: " + e.getMessage());
-
-                    return new String[] { "", "", "" };
-                }
-            }
-        } else {
-            q = q.replaceAll("[^a-zA-Z0-9 ]", "");
-            q = q.replace(" ", "%20");
+//        JSONObject j = GetData(request_type.GET, "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=" + q + "&format=json");
+//        if (j.getBoolean("_success") && !j.toString().contains("Bad Request") && !j.toString().contains("Not Found")) {
+//            if (j.toString().contains("Unauthorized")) {
+//                com.gmt2001.Console.debug.println("URL Check Returned Unauthorized (Video Marked Private)");
+//
+//                return new String[] { q, "Video Marked Private", "", "" };
+//            }
+//
+//            if (j.getInt("_http") == 200) {
+//                try {
+//                    com.gmt2001.Console.debug.println("URL Check Success");
+//
+//                    String a = j.getString("title");
+//                    return new String[] { q, a, "", "" };
+//                } catch (Exception e) {
+//                    com.gmt2001.Console.debug.println("Exception: " + e.getMessage());
+//
+//                    return new String[] { "", "", "", "" };
+//                }
+//            }
+//        } else {
+//            q = q.replaceAll("[^a-zA-Z0-9 ]", "");
+//            q = q.replace(" ", "%20");
 
             JSONObject j2 = GetData(request_type.GET, "https://www.googleapis.com/youtube/v3/search?q=" + q + "&key=" + apikey + "&type=video&part=snippet&maxResults=1");
             if (j2.getBoolean("_success")) {
@@ -217,9 +217,12 @@ public class YouTubeAPIv3 {
                     if (pageInfo.getInt("totalResults") == 0) {
                         com.gmt2001.Console.debug.println("Search API Called: No Results");
 
-                        return new String[] { q, "No Search Results Found", "" };
+                        return new String[] { q, "No Search Results Found", "", "", j2.toString() };
                     }
-
+                    
+//                    com.gmt2001.Console.debug.println("JSON: " + j2.toString(2));
+//                    com.gmt2001.Console.err.println("JSON: " + j2.toString(2));
+                    
                     JSONArray a = j2.getJSONArray("items");
                     if (a.length() > 0) {
                         JSONObject it = a.getJSONObject(0);
@@ -229,27 +232,27 @@ public class YouTubeAPIv3 {
 
                         com.gmt2001.Console.debug.println("Search API Success");
 
-                        return new String[] { id.getString("videoId"), sn.getString("title"), sn.getString("channelTitle") };
+                        return new String[] { id.getString("videoId"), sn.getString("title"), sn.getString("channelTitle"), j2.getString("regionCode") };
                     } else {
                         com.gmt2001.Console.debug.println("Search API Fail: Length == 0");
 
-                        return new String[] { "", "", "" };
+                        return new String[] { "", "", "", "" };
                     }
                 } else {
                     com.gmt2001.Console.debug.println("Search API Fail: HTTP Code " + j2.getInt("_http"));
 
-                    return new String[] { "", "", "" };
+                    return new String[] { "", "", "", "" };
                 }
             } else {
                 com.gmt2001.Console.debug.println("Search API Fail: Returned Failure");
 
-                return new String[] { "", "", "" };
+                return new String[] { "", "", "", "" };
             }
-        }
-
-        com.gmt2001.Console.debug.println("URL Check Fatal Error");
-
-        return new String[] { "", "", "" };
+//        }
+//
+//        com.gmt2001.Console.debug.println("URL Check Fatal Error");
+//
+//        return new String[] { "", "", "","" };
     }
 
     public int[] GetVideoLength(String id) throws JSONException {

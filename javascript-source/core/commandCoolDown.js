@@ -200,10 +200,10 @@
      * @param {Boolean} isGlobal
      */
     function add(command, seconds, isGlobal) {
-        // Make sure we have the right type.
-        if (typeof seconds !== 'number') {
-            seconds = (parseInt(seconds + ''));
-        }
+    	// Make sure we have the right type.
+    	if (typeof seconds !== 'number') {
+    		seconds = (parseInt(seconds + ''));
+    	}
 
         if (cooldowns[command] === undefined) {
             cooldowns[command] = new Cooldown(command, seconds, isGlobal);

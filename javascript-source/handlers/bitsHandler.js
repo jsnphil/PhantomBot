@@ -96,6 +96,9 @@
 
         $.writeToFile(username + ' ', './addons/bitsHandler/latestCheer.txt', false);
         $.writeToFile(username + ': ' + bits + ' ', './addons/bitsHandler/latestCheer&Bits.txt', false);
+
+
+        checkForAutobump(username, bits);
     });
 
     /*
@@ -146,7 +149,35 @@
             $.say($.whisperPrefix(sender) + $.lang.get('bitshandler.minimum.set', minimum));
             $.log.event(sender + ' changed the bits minimum to: ' + minimum + ' bits.');
         }
+
+        if (command.equalsIgnoreCase('testbits')) {
+            checkForAutobump(args[0], args[1]);
+        }
     });
+
+    function checkForAutobump(username, bits) {
+        $.log.file('bitsHandler', 'Checking database for existing bump data');
+        var bumpObj = JSON.parse($.getIniDbString('bumps', username, '{}'));
+
+        var bitsCount = 0;
+        if (bumpObj.hasOwnProperty('bits')) {
+            bitsCount = parseInt(bumpObj.bits) + bits;
+        } else {
+            bitsCount = bits;
+            bumpFulfilled = false;
+
+            bumpObj.bits = bits + '';
+            bumpObj.donation = '0';
+            bumpObj.fulfilled = 'false';
+            bumpObj.type = 'paid';
+        }
+
+        $.setIniDbString('bumps', username, JSON.stringify(bumpObj));
+
+        if (bitsCount >= 300) {
+            $.autoBump(username, "paid", "bits");
+        }
+    }
 
     /*
      * @event initReady
@@ -155,6 +186,8 @@
         $.registerChatCommand('./handlers/bitsHandler.js', 'bitstoggle', 1);
         $.registerChatCommand('./handlers/bitsHandler.js', 'bitsmessage', 1);
         $.registerChatCommand('./handlers/bitsHandler.js', 'bitsminimum', 1);
+
+        $.registerChatCommand('./handlers/bitsHandler.js', 'testbits', 2);
         announceBits = true;
     });
 

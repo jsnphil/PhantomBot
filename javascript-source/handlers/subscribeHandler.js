@@ -131,9 +131,6 @@
             if (message != '') {
                 $.say(message);
             }
-
-            $.autoBump(subscriber);
-
             $.addSubUsersList(subscriber);
             $.restoreSubscriberStatus(subscriber);
             $.writeToFile(subscriber + ' ', './addons/subscribeHandler/latestSub.txt', false);
@@ -141,6 +138,8 @@
             if (subReward > 0) {
                 $.inidb.incr('points', subscriber, subReward);
             }
+
+            $.autoBump(subscriber, "paid", "sub");
         }
     });
 
@@ -178,9 +177,6 @@
             if (message != '') {
                 $.say(message);
             }
-
-            $.autoBump(subscriber);
-
             $.addSubUsersList(subscriber);
             $.restoreSubscriberStatus(subscriber);
             $.writeToFile(subscriber + ' ', './addons/subscribeHandler/latestSub.txt', false);
@@ -188,6 +184,9 @@
             if (subReward > 0) {
                 $.inidb.incr('points', subscriber, subReward);
             }
+
+            $.autoBump(subscriber, "paid", "sub");
+
         }
     });
 
@@ -242,9 +241,6 @@
             if (message != '') {
                 $.say(message);
             }
-
-            $.autoBump(resubscriber);
-
             $.addSubUsersList(resubscriber);
             $.restoreSubscriberStatus(resubscriber);
             $.writeToFile(resubscriber + ' ', './addons/subscribeHandler/latestResub.txt', false);
@@ -253,6 +249,8 @@
             if (reSubReward > 0) {
                 $.inidb.incr('points', resubscriber, reSubReward);
             }
+
+            $.autoBump(resubscriber, "paid", "sub");
         }
     });
 
@@ -312,8 +310,6 @@
                 $.say(message);
             }
 
-            $.autoBump(gifter);
-
             $.addSubUsersList(recipient);
             $.restoreSubscriberStatus(recipient);
 
@@ -326,6 +322,9 @@
             if (giftSubReward > 0) {
                 $.inidb.incr('points', gifter, giftSubReward);
             }
+
+            $.autoBump(gifter, "paid", "giftsub");
+
         }
     });
 
@@ -374,11 +373,11 @@
                 $.say(message);
             }
 
-            $.autoBump(gifter);
-
             if (massGiftSubReward > 0) {
                 $.inidb.incr('points', gifter, massGiftSubReward * parseInt(amount));
             }
+
+            $.autoBump(gifter, "paid", "giftsub");
         }
     });
 

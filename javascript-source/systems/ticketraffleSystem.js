@@ -178,7 +178,7 @@
         if (!$.inidb.exists('entered', user.toLowerCase())) {
             totalEntries++;
         }
-    price = times;
+	price = times;
         if (tags.getTags().containsKey('subscriber') && tags.getTags().get('subscriber').equals('1')) {
             times *= subTMulti;
         } else if ($.isReg(user)) {

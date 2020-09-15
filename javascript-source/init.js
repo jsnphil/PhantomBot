@@ -893,6 +893,13 @@
         });
 
         /*
+         * @event yTPlayerRequestSongHistoryEvent
+         */
+        $api.on($script, 'yTPlayerRequestSongHistory', function (event) {
+            callHook('yTPlayerRequestSongHistory', event, false);
+        });
+
+        /*
          * @event twitterEvent
          */
         $api.on($script, 'twitter', function (event) {

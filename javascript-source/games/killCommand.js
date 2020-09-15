@@ -32,7 +32,7 @@
      * @function reloadKill
      */
     function reloadKill() {
-        jailTimeout = $.getIniDbNumber('settings', 'killTimeoutTime', 60);
+    	jailTimeout = $.getIniDbNumber('settings', 'killTimeoutTime', 60);
     }
 
     /**
