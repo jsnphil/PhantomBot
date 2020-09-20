@@ -97,5 +97,9 @@
         $.registerChatCommand('./custom/stickSystem.js', 'setsticks', 2);
         $.registerChatCommand('./custom/stickSystem.js', 'oops', 2);
         $.registerChatCommand('./custom/stickSystem.js', 'rip', 2);
+
+        $.discord.registerCommand('./custom/stickSystem.js', 'drops');
+        $.discord.registerCommand('./custom/stickSystem.js', 'breaks', 7);
+        $.discord.registerCommand('./custom/stickSystem.js', 'setsticks', 2);
     });
 })();
