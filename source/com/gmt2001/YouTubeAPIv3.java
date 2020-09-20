@@ -210,9 +210,7 @@ public class YouTubeAPIv3 {
 //            q = q.replaceAll("[^a-zA-Z0-9 ]", "");
 //            q = q.replace(" ", "%20");
 
-            if (q.startsWith("-")) {
-                q = "\\-" + q;
-            }
+            q = "'" + q + "'";
             
             com.gmt2001.Console.debug.println("Query: " + q);
             com.gmt2001.Console.err.println("Query: " + q);
