@@ -107,7 +107,7 @@ $.lang.register('ytplayer.command.nextsong.range.404', 'No songs found in that r
 
 $.lang.register('ytplayer.requestsong.error.maxrequests', 'Exceeds maximum concurrent requests');
 $.lang.register('ytplayer.requestsong.error.disabled', 'Song requests are disabled');
-$.lang.register('ytplayer.requestsong.error.maximum.concurrent.requests', 'Only $1 request allowed in the queue at time');
+$.lang.register('ytplayer.requestsong.error.maximum.concurrent.requests', 'Only $1 request allowed in the queue at time.  If you would like to change your request, use !edit <link>');
 $.lang.register('ytplayer.requestsong.error.yterror', 'YouTube error ($1)');
 $.lang.register('ytplayer.requestsong.error.exists', 'Song is already in queue');
 $.lang.register('ytplayer.requestsong.error.maxlength', 'Song length is $1 and exceeds maximum length');
