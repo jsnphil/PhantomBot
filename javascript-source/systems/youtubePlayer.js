@@ -2508,13 +2508,19 @@
     }
 
     function getBumpPosition() {
+        $.log.file('youtube-player', 'Getting bump position');
         var bumpPosition = 0;
         var i;
 
         for (i = 0; i < currentPlaylist.getRequestsCount(); i++) {
             req = currentPlaylist.getRequestAtIndex(i);
+
+            $.log.file('youtube-player', 'Checking request (' + req.getVideoTitle() + ') at position [' + i + ']');
+            $.log.file('youtube-player', '- Bump flag [' + req.isBump() + '], Shuffle flag [' + req.isShuffle() + ']');
+
             if (!req.isBump() && !req.isShuffle()) {
                 bumpPosition = i;
+                $.log.file('youtube-player', 'Bump position = ' + bumpPosition);
                 break;
             }
         }
