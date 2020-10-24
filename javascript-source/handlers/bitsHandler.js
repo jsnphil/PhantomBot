@@ -157,7 +157,7 @@
 
     function checkForAutobump(username, bits) {
         $.log.file('bitsHandler', 'Checking database for existing bump data');
-        var bumpObj = JSON.parse($.getIniDbString('bumps', username, '{}'));
+        var bumpObj = JSON.parse($.getIniDbString('bumps', username.toLowerCase()), '{}'));
 
         var bitsCount = 0;
         if (bumpObj.hasOwnProperty('bits')) {
@@ -172,7 +172,7 @@
             bumpObj.type = 'paid';
         }
 
-        $.setIniDbString('bumps', username, JSON.stringify(bumpObj));
+        $.setIniDbString('bumps', username.toLowerCase()), JSON.stringify(bumpObj));
 
         if (bitsCount >= 300) {
             $.autoBump(username, "paid", "bits");

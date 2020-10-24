@@ -328,7 +328,7 @@
         $.log.file('queue-management', 'Running auto-bump for user [' + user + '], method [' + method + ']');
 
         $.log.file('queue-management', 'Checking database for existing bump data');
-        var bumpObj = JSON.parse($.getIniDbString('bumps', user, '{}'));
+        var bumpObj = JSON.parse($.getIniDbString('bumps', user.toLowerCase()), '{}'));
 
         var bumpFulfilled;
         if (bumpObj.hasOwnProperty('fulfilled')) {
@@ -366,7 +366,7 @@
             bumpObj.method = method + '';
 
             $.log.file('queue-management', 'Saving bump data to DB');
-            $.setIniDbString('bumps', user, JSON.stringify(bumpObj));
+            $.setIniDbString('bumps', user.toLowerCase()), JSON.stringify(bumpObj));
 
             $.log.file('queue-management', 'Autobump complete');
         } else {
