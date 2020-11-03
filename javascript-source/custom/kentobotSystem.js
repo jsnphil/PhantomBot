@@ -21,6 +21,8 @@
  * General bot maintenance and control
  */
 (function () {
+    
+    var botMode = "";
 
     function secondsToTimestamp(timeInSeconds) {
         // multiply by 1000 because Date() requires miliseconds
@@ -56,6 +58,10 @@
 
         return time;
     }
+    
+    function botMode() {
+        return mode;
+    }
 
     $.bind('command', function (event) {
         var sender = event.getSender(), // Gets the person who used the command
@@ -64,9 +70,27 @@
 
                 action = args[0];
 
+        if (command.equalsIgnoreCase("mode")) {
+            if (action == null) {
+                $.say($.lang.get('kentobot.mode.usage'));
+            }
+            
+            if (action.equalsIgnoreCase("music")) {
+                mode = "music";
+                $.say($.lang.get('kentobot.mode.music'));
+            } else if (action.equalsIgnoreCase("game")) {
+                mode = "game";
+                $.say($.lang.get('kentobot.mode.game'));
+            } else {
+                $.say($.lang.get('kentobot.mode.invalid', action));
+            }
+        }
 
-        // Put in Kentobot System file
         if (command.equalsIgnoreCase("startstream")) {
+
+            // Set stream mode
+            mode = "music";
+            $.say($.lang.get('kentobot.mode.music'));
 
             // Clear Song History
             $.clearSongHistory();
@@ -131,6 +155,7 @@
 
     $.secondsToTimestamp = secondsToTimestamp;
     $.trimZerosFromTime = trimZerosFromTime;
+    $.botMode = botMode;
 
     /**
      * @event initReady
@@ -143,6 +168,7 @@
         // $.registerChatCommand('script', 'command', 'permission');
 
         $.registerChatCommand('./custom/kentobotSystem.js', 'startstream', 0);
+        $.registerChatCommand('./custom/kentobotSystem.js', 'mode', 2);
     });
 })();
 

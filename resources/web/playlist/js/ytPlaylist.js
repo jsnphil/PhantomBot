@@ -177,9 +177,13 @@ function handleSongList(d) {
         tableData += '<div class="data dataQueuePosition"> #' + playerIndex;
 
         if (bumped == "true") {
+            tableData += '<div class="data dataQueuePosition"> #' + playerIndex;
             tableData += ' <i class="fas fa-star"></i>';
         } else if (shuffle == "true") {
+            tableData += '<div class="data dataQueuePosition"> #' + playerIndex
             tableData += ' <i class="fas fa-dice"></i>';
+        } else {
+            tableData += '<div class="data dataQueuePosition">';
         }
         tableData += '</div>';
 

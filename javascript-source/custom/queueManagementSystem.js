@@ -41,7 +41,7 @@
             existingRequest[0].setBumpFlag();
             $.currentPlaylist().addToQueue(existingRequest[0], bumpPosition);
             $.getConnectedPlayerClient().pushSongList();
-            $.say($.whisperPrefix(userToBump) + $.lang.get('songqueuemgmt.command.bump.success', bumpPosition + 1));
+            $.say($.whisperPrefix(userToBump) + $.lang.get('songqueuemgmt.command.bump.success', bumpPosition));
 
             var bumpData = JSON.parse($.getIniDbString("bumps", userToBump, '{}'));
 
@@ -324,6 +324,11 @@
     });
 
     function autoBump(user, type, method) {
+        if (!($.botMode().equalsIgnoreCase("music"))) {
+           // Not in music mode, exiting
+           return;
+        }
+        
         $.log.file('queue-management', '-------------------');
         $.log.file('queue-management', 'Running auto-bump for user [' + user + '], method [' + method + ']');
 
