@@ -161,6 +161,7 @@ function handleSongList(d) {
         tableData += '<a href="https://youtu.be/' + id + '" target="_blank">';
 
         tableData += '<div class="dataRow">';
+
         // Position Column
         tableData += '<div class="data dataQueuePosition"> #' + playerIndex;
 

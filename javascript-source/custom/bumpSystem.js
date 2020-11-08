@@ -96,7 +96,7 @@
         // These are also used for the permcom command.
         // $.registerChatCommand('script', 'command', 'permission');
 
-        $.registerChatCommand('./custom/kentobotSystem.js', 'startstream', 0);
+//        $.registerChatCommand('./custom/kentobotSystem.js', 'startstream', 0);
     });
 })();
 

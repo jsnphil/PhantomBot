@@ -41,7 +41,7 @@
             existingRequest[0].setBumpFlag();
             $.currentPlaylist().addToQueue(existingRequest[0], bumpPosition);
             $.getConnectedPlayerClient().pushSongList();
-            $.say($.whisperPrefix(userToBump) + $.lang.get('songqueuemgmt.command.bump.success', bumpPosition));
+            $.say($.whisperPrefix(userToBump) + $.lang.get('songqueuemgmt.command.bump.success', bumpPosition + 1));
 
             var bumpData = JSON.parse($.getIniDbString("bumps", userToBump, '{}'));
 
@@ -324,16 +324,18 @@
     });
 
     function autoBump(user, type, method) {
+        $.log.file('queue-management', '[autoBump] - Bot mode: ' + $.botMode());
+
         if (!($.botMode().equalsIgnoreCase("music"))) {
-           // Not in music mode, exiting
-           return;
+            // Not in music mode, exiting
+            return;
         }
-        
+
         $.log.file('queue-management', '-------------------');
         $.log.file('queue-management', 'Running auto-bump for user [' + user + '], method [' + method + ']');
 
         $.log.file('queue-management', 'Checking database for existing bump data');
-        var bumpObj = JSON.parse($.getIniDbString('bumps', user.toLowerCase()), '{}'));
+        var bumpObj = JSON.parse($.getIniDbString('bumps', user.toLowerCase()), '{}');
 
         var bumpFulfilled;
         if (bumpObj.hasOwnProperty('fulfilled')) {
@@ -371,7 +373,7 @@
             bumpObj.method = method + '';
 
             $.log.file('queue-management', 'Saving bump data to DB');
-            $.setIniDbString('bumps', user.toLowerCase()), JSON.stringify(bumpObj));
+            $.setIniDbString('bumps', user.toLowerCase(), JSON.stringify(bumpObj));
 
             $.log.file('queue-management', 'Autobump complete');
         } else {
