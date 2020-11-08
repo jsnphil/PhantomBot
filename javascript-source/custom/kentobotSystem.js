@@ -103,10 +103,10 @@
                 // Reset bump counts
                 // Remove fulfilled free bumps
                 var bumps = $.inidb.GetKeyList('bumps', '');
-                $.log.file('kentobotSystem', 'Saved bumps - ' + bumps);
+                $.log.file('kentobot-system', 'Saved bumps - ' + bumps);
 
                 for (var i = 0; i < bumps.length; i++) {
-                    $.log.file('kentobotSystem', 'Bump found for ' + bumps[i]);
+                    $.log.file('kentobot-system', 'Bump found for ' + bumps[i]);
 
                     var bumpObj = JSON.parse($.inidb.get("bumps", bumps[i]));
                     if (bumpObj.hasOwnProperty('fulfilled')) {
@@ -119,7 +119,7 @@
                         }
 
                         if (bumpFulfilled.equalsIgnoreCase("true") || method.equalsIgnoreCase("raid") || type.equalsIgnoreCase("free")) {
-                            $.log.file('kentobotSystem', 'Deleting bump data for ' + bumps[i]);
+                            $.log.file('kentobot-system', 'Deleting bump data for ' + bumps[i]);
                             $.inidb.del('bumps', bumps[i]);
                         }
                     }
@@ -184,8 +184,6 @@
         // $.registerChatCommand('script', 'command', 'permission');
 
         $.registerChatCommand('./custom/kentobotSystem.js', 'startstream', 0);
-        $.registerChatSubcommand('startstream', 'mode', 2);
-
         $.registerChatCommand('./custom/kentobotSystem.js', 'mode', 2);
         $.registerChatCommand('./custom/kentobotSystem.js', 'mode?', 2);
 

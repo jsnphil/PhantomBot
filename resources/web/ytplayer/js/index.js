@@ -30,6 +30,7 @@ $(function () {
     var cluster = null,
             timer = null;
 
+    var DEBUG_MODE = true;
     /*
      * @function Loads the player page.
      *
@@ -222,8 +223,19 @@ $(function () {
             }
         });
 
+        // Add a listener for the queue information
+        player.addListener('songqueueinfo', (e) => {
+            let table = $('#queue-info-table'),
+                    queueInfo = e.queueStatus;
+
+            debugMsg('handleQueueInfo(' + queueInfo + ')');
+            document.title = 'Kentobot Player - ' + queueInfo.status;
+        });
+
         // Add a listener for the songrequest queue.
         player.addListener('songlist', (e) => {
+            debugMsg('handleSongList(' + e + ')');
+
             let table = $('#queue-table-content'),
                     songlist = e.songlist;
 
@@ -377,7 +389,7 @@ $(function () {
                 toastr.success('Now playing: ' + (e.title.length > 30 ? e.title.substring(0, 30) + '...' : e.title));
             }
 
-            document.title = 'Kentobot Player - ' + e.title + ' - ' + e.requester;
+//            document.title = 'Kentobot Player - ' + e.title + ' - ' + e.requester;
 
 
             // Update the value under the slider.
@@ -437,6 +449,9 @@ $(function () {
 
                     // Request the songlist.
                     player.requestRequestList('songlist');
+
+                    // Request the queue status
+                    player.requestQueueStatus('songqueueinfo');
 
                     // Send the ready event.
                     player.ready();
@@ -639,3 +654,10 @@ $(function () {
                 });
     }
 });
+
+function debugMsg(message) {
+    console.log("ytPlayer::DEBUG::" + message);
+}
+function logMsg(message) {
+    console.log('ytPlayer::' + message);
+}

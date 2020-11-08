@@ -22,7 +22,7 @@
  */
 (function () {
 
-    $.bind('command', function (event) {
+    $.bind('discordChannelCommand', function (event) {
         var sender = event.getSender(), // Gets the person who used the command
                 command = event.getCommand(), // Gets the command being used
                 args = event.getArgs(), // Arguments used in the command
@@ -92,12 +92,12 @@
         // These are also used for the permcom command.
         // $.registerChatCommand('script', 'command', 'permission');
 
-        $.discord.registerCommand('./discord/custom/stickSystem.js', 'drops', 7);
-        $.discord.registerCommand('./discord/custom/stickSystem.js', 'breaks', 7);
-        $.discord.registerCommand('./discord/custom/stickSystem.js', 'setsticks', 2);
-        $.discord.registerSubCommand('setsticks', 'breaks', 2);
-        $.discord.registerSubCommand('setsticks', 'drops', 2);
-        $.discord.registerCommand('./discord/custom/stickSystem.js', 'oops', 2);
-        $.discord.registerCommand('./discord/custom/stickSystem.js', 'rip', 2);
+        $.discord.registerCommand('./discord/custom/stickSystem.js', 'drops', 0);
+        $.discord.registerCommand('./discord/custom/stickSystem.js', 'breaks', 0);
+        $.discord.registerCommand('./discord/custom/stickSystem.js', 'setsticks', 0);
+        $.discord.registerSubCommand('setsticks', 'breaks', 0);
+        $.discord.registerSubCommand('setsticks', 'drops', 0);
+        $.discord.registerCommand('./discord/custom/stickSystem.js', 'oops', 0);
+        $.discord.registerCommand('./discord/custom/stickSystem.js', 'rip', 0);
     });
 })();
