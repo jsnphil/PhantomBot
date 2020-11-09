@@ -16,9 +16,22 @@
  */
 
 /**
- * kentobotSystem.js
- *
- * General bot maintenance and control
+ * 
+ * {
+	"user": "username",
+	"bits": 100,
+	"donations": 10,
+	"freeBumpUsed: true,
+	"totalBumps": 2,
+	"bumps": [
+		{
+			"status": "pending|fulfilled",
+			"method": "bits|donation|sub|giftsub|raid"
+		}
+	]
+}
+ * 
+ * 
  */
 (function () {
     var userToBump = "",
