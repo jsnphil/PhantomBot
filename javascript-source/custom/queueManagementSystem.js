@@ -16,30 +16,118 @@
  */
 
 /**
- * 
- * {
-	"user": "username",
-	"bits": 100,
-	"donations": 10,
-	"freeBumpUsed: true,
-	"totalBumps": 2,
-	"bumps": [
-		{
-			"status": "pending|fulfilled",
-			"method": "bits|donation|sub|giftsub|raid"
-		}
-	]
-}
- * 
- * 
+ * TODO Song request section needs to be updated to check the bumps to see if user has a pending bump
+ * TODO 'Play' section of youtubeSystem needs to check if the request is a bump and update the status if it is
+ * TODO May need a new data model to store the bumps in so that objects can be updated in place.  Needs testing
+ * TODO Increment totalBumpCount
  */
 (function () {
     var userToBump = "",
             requireOverride = false,
             requestToBump,
-            bumpPosition;
+            bumpPosition,
+            bumpsArray = new java.util.ArrayList,
+            bumpStatusEnum = {
+                PENDING: 0,
+                FULFILLED: 1
+            },
+            bumpMethodEnum = {
+                CMD: 0,
+                BITS: 1,
+                DONATION: 2,
+                SUB: 3,
+                GIFTSUB: 4,
+                RAID: 5
+            };
 
     /** END CONSTRUCTOR BumpedUser **/
+    function Bump() {
+        var status = '',
+                method = '';
+
+        this.getStatus = function () {
+            return this.status;
+        };
+
+        this.setStatus = function (status) {
+            this.status = status;
+        };
+
+        this.getMethod = function () {
+            return this.method;
+        };
+
+        this.setMethod = function (method) {
+            this.method = method;
+        };
+        /** End Bump */
+    }
+
+    function UserBumpData(user) {
+        var bits = 0,
+                donation = 0,
+                freeBumpUsed = false,
+                totalBumps = 0,
+                bumps = new java.util.ArrayList;
+
+        this.getUser = function () {
+            return user;
+        };
+
+        this.getBits = function () {
+            return this.bits;
+        };
+
+        this.setBits = function (bits) {
+            this.bits = bits;
+        };
+
+        this.addBits = function (bits) {
+            this.bits = this.bits + bits;
+        };
+
+        this.getDonation = function () {
+            return this.donation;
+        };
+
+        this.setDonation = function (donation) {
+            this.donation = donation;
+        };
+
+        this.addDonation = function (donation) {
+            this.donation = this.donation + donation;
+        };
+
+        this.getFreeBumpUsed = function () {
+            return this.freeBumpUsed;
+        };
+
+        this.setFreeBumpUsed = function (freeBumpUsed) {
+            this.freeBumpUsed = freeBumpUsed;
+        };
+
+        this.getTotalBumps = function () {
+            return this.totalBumps;
+        };
+
+        this.setTotalBumps = function (totalBumps) {
+            this.totalBumps = totalBumps;
+        };
+
+        this.incrementBumpCount = function () {
+            this.totalBumps++;
+        };
+
+        this.getBumps = function () {
+            return this.bumps;
+        };
+
+        this.addBump = function (bump) {
+            this.bumps.add(bump);
+        };
+
+        /** End UserBumpData */
+    }
 
     $.bind('ircChannelMessage', function (event) {
         if ($.isModv3(event.getSender()) && requireOverride === true && event.getMessage().equalsIgnoreCase("allow")) {
@@ -56,14 +144,12 @@
             $.getConnectedPlayerClient().pushSongList();
             $.say($.whisperPrefix(userToBump) + $.lang.get('songqueuemgmt.command.bump.success', bumpPosition + 1));
 
-            var bumpData = JSON.parse($.getIniDbString("bumps", userToBump, '{}'));
-
-            bumpData.type = 'free';
-            bumpData.fulfilled = 'true';
+            var bump = new Bump();
+            bump.setStatus(bumpStatusEnum.PENDING);
+            bump.setMethod(bumpMethodEnum.CMD);
 
             $.log.file('queue-management', 'Saving new bump data');
-
-            $.setIniDbString('bumps', userToBump, JSON.stringify(bumpData));
+            bumpData.add(bump);
         } else {
             $.say($.whisperPrefix(userToBump) + $.lang.get('songqueuemgmt.command.move.none', userToBump));
         }
@@ -82,27 +168,17 @@
     function getBumpData(user) {
         $.log.file('queue-management', 'Looking for bump data for user [' + user + ']');
 
-        var bumpData = JSON.parse($.getIniDbString("bumps", user, '{}'));
+        var bump;
+        for (var i = 0; i < bumpsArray.length; i++) {
+            bump = bumpData[i];
+            if (bump != null && bump.getUser().equalsIgnoreCase(user.toLowerCase())) {
+                return bump;
+            }
+        }
 
-        if (!bumpData.hasOwnProperty('fulfilled')) {
+        if (bump == null) {
             $.log.file('queue-management', 'Didn\'t find bump data for user, creating one');
-            bumpData.type = "free";
-            $.setIniDbString('bumps', userToBump, JSON.stringify(bumpData));
-        }
-
-        return bumpData;
-    }
-
-    function checkUserBumps(bumpData) {
-        if (bumpData == null) {
-            $.log.file('queue-management', 'No stored bump information for user');
-            return false;
-        }
-
-        if (bumpData.hasOwnProperty('fulfilled')) {
-            return bumpData.fulfilled;
-        } else {
-            return false;
+            return new UserBumpData(user);
         }
     }
 
@@ -144,13 +220,11 @@
                 return;
             }
 
-            /*
-             *  TODO Check if the user has reached their max bumps
-             */
-
             var bumpData = getBumpData(userToBump);
-            var bumpLimitReached = checkUserBumps(bumpData);
-            if (bumpLimitReached) {
+            var userBumpCount = bumpData.getTotalBumps();
+
+            if (userBumpCount >= 2 || bumpData.getFreeBumpUsed()) {
+                // Bump limit is reached
                 $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.command.bump.limit.reached', userToBump));
                 requireOverride = true;
 
@@ -159,6 +233,7 @@
                     resetBump();
                 }, (1e4));
             } else {
+                bumpData.setFreeBumpUsed(true);
                 performBump(bumpData);
             }
         }
@@ -251,16 +326,8 @@
             return;
         }
 
+        // TODO Swap out with new bump objects
         if (command.equalsIgnoreCase('bumpxfer')) {
-            /*
-             * TODO
-             * Check that user has a bump redeemed already
-             * Check that recipient to has a song in the queue
-             * Mark recipient song as a bump and move to top
-             * Mark gifter bump as redeemed
-             * If gifter has a bumped song, remove bump and move back into the main queue
-             */
-
             if (!(args[0] && args[1])) {
                 $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.autobump.xfer.usage'));
                 return;
@@ -300,6 +367,7 @@
             }
         }
 
+        // TODO Swap out with new bump objects
         if (command.equalsIgnoreCase('removebump')) {
             if (!args[0]) {
                 $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.autobump.remove.usage'));
@@ -336,7 +404,7 @@
         }
     });
 
-    function autoBump(user, type, method) {
+    function autoBump(user, method) {
         $.log.file('queue-management', '[autoBump] - Bot mode: ' + $.botMode());
 
         if (!($.botMode().equalsIgnoreCase("music"))) {
@@ -344,31 +412,28 @@
             return;
         }
 
-        $.log.file('queue-management', '-------------------');
-        $.log.file('queue-management', 'Running auto-bump for user [' + user + '], method [' + method + ']');
+        $.log.file('queue-management', '[autoBump] - Running auto-bump for user [' + user + '], method [' + method + ']');
 
-        $.log.file('queue-management', 'Checking database for existing bump data');
-        var bumpObj = JSON.parse($.getIniDbString('bumps', user.toLowerCase()), '{}');
+        var bumpData = getBumpData(user);
+        var userBumpCount = bumpData.getTotalBumps();
 
-        var bumpFulfilled;
-        if (bumpObj.hasOwnProperty('fulfilled')) {
-            bumpFulfilled = (bumpObj.fulfilled == 'true');
-        } else {
-            bumpFulfilled = false;
+        // TODO Needs an addition check to see if user already has a pending bump.  If yes, save as a new pending bump (if they still have one left)
+        if (userBumpCount < 2) {
+            var bump = new Bump();
+            bump.setStatus(bumpStatusEnum.PENDING);
+            bump.setMethod(method);
 
-            bumpObj.bits = '0';
-            bumpObj.donation = '0';
-            bumpObj.fulfilled = 'false';
-            bumpObj.type = type + '';
-        }
+            bumpData.addBump(bump);
 
-        if (!bumpFulfilled) {
-            $.log.file('queue-management', 'Bump has not been fulfilled, looking for user in the queue to bump');
+            // TODO How to update the object in place.  New list structure?
+            bumpsArray.add(bumpData);
+
+            $.log.file('queue-management', '[autoBump] - Bump has not been fulfilled, looking for user in the queue to bump');
 
             var userRequest = $.getUserRequest(user);
 
             if (userRequest != null) {
-                $.log.file('queue-management', 'Found user request, bumping');
+                $.log.file('queue-management', '[autoBump] - Found user request, bumping');
 
                 userRequest[0].setBumpFlag();
 
@@ -377,24 +442,26 @@
 
                 $.say($.whisperPrefix(user) + $.lang.get('songqueuemgmt.command.bump.success', $.getBumpPosition() + 1));
             } else {
-                $.log.file('queue-management', 'No request found for user, saving for their next request');
-
+                $.log.file('queue-management', '[autoBump] - No request found for user, saving for their next request');
                 $.say($.whisperPrefix(user) + $.lang.get('songqueuemgmt.autobump.nextsong'));
-
             }
-
-            bumpObj.method = method + '';
-
-            $.log.file('queue-management', 'Saving bump data to DB');
-            $.setIniDbString('bumps', user.toLowerCase(), JSON.stringify(bumpObj));
-
-            $.log.file('queue-management', 'Autobump complete');
         } else {
-            $.log.file('queue-management', 'Bump has already been fulfilled');
+            $.log.file('queue-management', '[autoBump] - User has already been fulfilled all their allowed bumps');
         }
     }
 
+    function bumpMethod() {
+        return bumpMethodEnum;
+    }
+
+    function bumpStatus() {
+        return bumpStatusEnum;
+    }
+
     $.autoBump = autoBump;
+    $.getBumpData = getBumpData;
+    $.bumpMethod = bumpMethod;
+    $.bumpStatus = bumpStatus;
 
     /**
      * @event initReady
