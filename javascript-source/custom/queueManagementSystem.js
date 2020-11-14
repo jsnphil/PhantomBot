@@ -68,7 +68,10 @@
                 donation = 0,
                 freeBumpUsed = false,
                 totalBumps = 0,
-                bumps = new java.util.ArrayList;
+                bumps = [],
+                user = '';
+        
+        this.user = user;
 
         this.getUser = function () {
             return user;
@@ -149,7 +152,8 @@
             bump.setMethod(bumpMethodEnum.CMD);
 
             $.log.file('queue-management', 'Saving new bump data');
-            bumpData.add(bump);
+            bumpData.addBump(bump);
+            bumpData.incrementBumpCount();
         } else {
             $.say($.whisperPrefix(userToBump) + $.lang.get('songqueuemgmt.command.move.none', userToBump));
         }
