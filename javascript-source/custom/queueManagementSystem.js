@@ -130,6 +130,7 @@
         $.inidb.RemoveFile('bumpSystem_bumpCounts');
         $.inidb.RemoveFile('bumpSystem_freeBumps');
         $.inidb.RemoveFile('bumpSystem_pendingBumps');
+        $.inidb.RemoveFile('bumpSystem_bitsCounts');
     }
 
     $.bind('command', function (event) {
@@ -327,7 +328,7 @@
 
                     $.getConnectedPlayerClient().pushSongList();
 
-                    $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.autobump.xfer.success', args[0]));
+                    $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.autobump.xfer.success', args[0], args[1]));
 
                 } else {
                     $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.autobump.xfer.404', args[0]));
@@ -389,7 +390,6 @@
 
                 $.currentPlaylist().addToQueue(userRequest[0], $.getBumpPosition());
                 $.getConnectedPlayerClient().pushSongList();
-                incrementBumpCount(userToBump);
 
                 $.say($.whisperPrefix(user) + $.lang.get('songqueuemgmt.command.bump.success', $.getBumpPosition() + 1));
             } else {
@@ -398,6 +398,8 @@
 
                 $.say($.whisperPrefix(user) + $.lang.get('songqueuemgmt.autobump.nextsong'));
             }
+
+            incrementBumpCount(userToBump);
         } else {
             $.log.file('queue-management', '[autoBump] - User has already fulfilled all their allowed bumps');
         }
