@@ -100,39 +100,7 @@
                 $.clearSongHistory();
                 $.say($.lang.get('kentobot.startstream.clearhistory'));
 
-                // Reset bump counts
-                // Remove fulfilled free bumps
-                var bumps = $.inidb.GetKeyList('bumps', '');
-                $.log.file('kentobot-system', 'Saved bumps - ' + bumps);
-
-                for (var i = 0; i < bumps.length; i++) {
-                    $.log.file('kentobot-system', 'Bump found for ' + bumps[i]);
-
-                    var bumpObj = JSON.parse($.inidb.get("bumps", bumps[i]));
-                    if (bumpObj.hasOwnProperty('fulfilled')) {
-                        var bumpFulfilled = bumpObj.fulfilled;
-                        var type = bumpObj.type;
-
-                        var method = '';
-                        if (bumpObj.hasOwnProperty('method')) {
-                            method = bumpObj.method;
-                        }
-
-                        if (bumpFulfilled.equalsIgnoreCase("true") || method.equalsIgnoreCase("raid") || type.equalsIgnoreCase("free")) {
-                            $.log.file('kentobot-system', 'Deleting bump data for ' + bumps[i]);
-                            $.inidb.del('bumps', bumps[i]);
-                        }
-                    }
-
-                    if (bumpObj.hasOwnProperty("method") && "sotn".equalsIgnoreCase(bumpObj.method)) {
-                        if (!bumpObj.hasOwnProperty("clearOnNext")) {
-                            bumpObj.clearOnNext = 'true';
-                            $.setIniDbString('bumps', bumps[i], JSON.stringify(bumpObj));
-                        } else {
-                            $.inidb.del('bumps', bumps[i]);
-                        }
-                    }
-                }
+                $.resetBumps();
                 $.say($.lang.get('kentobot.startstream.resetbumps'));
 
                 // Open the queue - may need hook back to YouTube Player

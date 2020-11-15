@@ -20,7 +20,7 @@
  * -------------
  * Produces a GUI for the playlists in YouTube Player
  */
-var DEBUG_MODE = true;
+var DEBUG_MODE = false;
 var connectedToWS = false;
 
 var url = window.location.host.split(":");

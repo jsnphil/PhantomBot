@@ -22,12 +22,6 @@
  */
 (function () {
 
-
-    function getBumpData(user) {
-
-    }
-
-
     $.bind('command', function (event) {
         var sender = event.getSender(), // Gets the person who used the command
                 command = event.getCommand(), // Gets the command being used
