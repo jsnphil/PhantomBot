@@ -1195,7 +1195,7 @@
             var jsonStatus = {};
             if (currentPlaylist) {
                 var requestStatus = "Closed",
-                        statusMode = "Sequential + Bumps",
+                        statusMode = "Sequential",
                         playCount = "",
                         runtime = "";
 
@@ -1204,7 +1204,7 @@
                 }
 
                 if (shuffleQueue) {
-                    statusMode = "Shuffle + Bumps";
+                    statusMode = "Shuffle";
                 }
 
 
@@ -1219,7 +1219,9 @@
                     "mode": statusMode,
                     "totalSongs": currentPlaylist.getRequestsCount(),
                     "playedSongs": playCount,
-                    "totalTime": runtime
+                    "totalTime": runtime,
+                    "channelPointsBumpsLeft": $.getChannelPointsBumpCount(),
+                    "beanBumpsLeft": $.getBeanBumpCount()
                 };
             } else {
                 jsonStatus['queueStatus'] = {
@@ -1227,7 +1229,9 @@
                     "mode": "Off",
                     "totalSongs": "",
                     "playedSongs": "",
-                    "totalTime": ""
+                    "totalTime": "",
+                    "channelPointsBumpsLeft": "",
+                    "beanBumpsLeft": ""
                 };
             }
 
@@ -2226,7 +2230,6 @@
                     $.say($.whisperPrefix(user) + $.lang.get('songqueuemgmt.autobump.' + pendingBump));
 
                     $.removePendingBump(user);
-                    $.incrementBumpCount(user);
                 } else {
                     if (!shuffleQueue) {
                         for (i = 0; i < currentPlaylist.getRequestsCount() - 1; i++) {

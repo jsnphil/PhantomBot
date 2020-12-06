@@ -101,7 +101,10 @@
                 $.say($.lang.get('kentobot.startstream.clearhistory'));
 
                 $.resetBumps();
+                $.resetChannelPointsBumps();
+                $.resetBeanBumps();
                 $.say($.lang.get('kentobot.startstream.resetbumps'));
+
 
                 // Open the queue - may need hook back to YouTube Player
                 $.enableSongRequests();

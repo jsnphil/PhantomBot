@@ -32,7 +32,9 @@
                 GIFTSUB: 4,
                 RAID: 5
             },
-            autoBumpEnabled = true;
+            autoBumpEnabled = true,
+            channelPointsRemaining = 0,
+            beanBumpsRemaining = 0;
 
     $.bind('ircChannelMessage', function (event) {
         if ($.isModv3(event.getSender()) && requireOverride === true && event.getMessage().equalsIgnoreCase("allow")) {
@@ -90,6 +92,46 @@
             return new UserBumpData(user);
         }
     }
+
+    /** Channel Points Bumps **/
+    function getChannelPointsBumpCount() {
+        return channelPointsRemaining;
+    }
+
+    function decrementChannelPointsBump() {
+        if (channelPointsRemaining != 0) {
+            channelPointsRemaining--;
+        }
+    }
+
+    function incrementChannelPointsBump() {
+        channelPointsRemaining++;
+    }
+
+    function resetChannelPointsBumps() {
+        channelPointsRemaining = 3;
+    }
+
+    /** Bean Bumps **/
+    function getBeanBumpCount() {
+        return beanBumpsRemaining;
+    }
+
+    function decrementBeanBump() {
+        if (beanBumpsRemaining != 0) {
+            beanBumpsRemaining--;
+        }
+    }
+
+    function incrementBeanBump() {
+        beanBumpsRemaining++;
+    }
+
+    function resetBeanBumps() {
+        beanBumpsRemaining = 3;
+    }
+
+    /**/
 
     function getBumpCount(user) {
         $.log.file('queue-management', 'Looking up bump count for user [' + user + ']');
@@ -304,6 +346,7 @@
             }
 
             var bumpRecipientRequest = $.getUserRequest(args[1]);
+
             if (bumpRecipientRequest == null) {
                 $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.command.move.none', args[0]));
                 return;
@@ -456,6 +499,15 @@
     $.resetBumps = resetBumps;
     $.enableAutobumps = enableAutobumps;
 
+    $.getChannelPointsBumpCount = getChannelPointsBumpCount;
+    $.decrementChannelPointsBump = decrementChannelPointsBump;
+    $.incrementChannelPointsBump = incrementChannelPointsBump;
+    $.resetChannelPointsBumps = resetChannelPointsBumps;
+
+    $.getBeanBumpCount = getBeanBumpCount;
+    $.decrementBeanBump = decrementBeanBump;
+    $.incrementBeanBump = incrementBeanBump;
+    $.resetBeanBumps = resetBeanBumps;
 
     /**
      * @event initReady

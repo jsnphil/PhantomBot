@@ -482,6 +482,7 @@
             var request = $.getUserRequest(username);
             if (request != null) {
                 $.autoBump(username, "points");
+                $.decrementChannelPointsBump();
             } else {
                 $.say($.whisperPrefix(username) + $.lang.get('songqueuemgmt.autobump.channelpoints.404'));
             }
