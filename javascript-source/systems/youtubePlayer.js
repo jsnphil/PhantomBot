@@ -152,8 +152,7 @@
                 license = 0,
                 embeddable = 0,
                 bumped = false,
-                shuffle = false,
-                regionCode = '';
+                shuffle = false;
 
         this.found = false;
 
@@ -334,18 +333,13 @@
                 throw 'No data returned.';
             }
 
-            $.log.file('youtube-player', data[0] + ", " + data[1] + ", " + data[2] + ", " + data[3]);
+            $.log.file('youtube-player', data[0] + ", " + data[1] + ", " + data[2]);
 
             videoId = data[0];
             videoTitle = data[1];
-            regionCode = data[3];
 
             if (videoTitle.equalsIgnoreCase('video marked private') || videoTitle.equalsIgnoreCase('no search results found')) {
                 throw videoTitle;
-            }
-
-            if (!regionCode.equalsIgnoreCase('US')) {
-                throw 'Video is not available in the US';
             }
 
             this.getVideoLength();
@@ -1196,8 +1190,7 @@
             if (currentPlaylist) {
                 var requestStatus = "Closed",
                         statusMode = "Sequential",
-                        playCount = "",
-                        runtime = "";
+                        playCount = "";
 
                 if (songRequestsEnabled) {
                     requestStatus = "Open";
@@ -1207,19 +1200,16 @@
                     statusMode = "Shuffle";
                 }
 
-
                 if (currentPlaylist.getSongRequestHistory() != null) {
                     playCount = playCount += currentPlaylist.getSongRequestHistory().length;
                 }
-
-                runtime = $.secondsToTimestamp(getQueueRuntime());
 
                 jsonStatus['queueStatus'] = {
                     "status": requestStatus,
                     "mode": statusMode,
                     "totalSongs": currentPlaylist.getRequestsCount(),
                     "playedSongs": playCount,
-                    "totalTime": runtime,
+                    "totalTime": $.secondsToTimestamp(getQueueRuntime()),
                     "channelPointsBumpsLeft": $.getChannelPointsBumpCount(),
                     "beanBumpsLeft": $.getBeanBumpCount()
                 };
@@ -1236,7 +1226,7 @@
             }
 
             var jsonString = JSON.stringify(jsonStatus);
-            $.log.file('youtube-player', 'Queue status JSON - ' + jsonString);
+            //  $.log.file('youtube-player', 'Queue status JSON - ' + jsonString);
 
             client.sendJSONToAll(jsonString);
 
@@ -2591,6 +2581,8 @@
                 break;
             }
         }
+
+        $.log.file('youtube-player', 'Position in the queue to bump to: ' + bumpPosition);
 
         return bumpPosition;
     }

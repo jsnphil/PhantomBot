@@ -165,5 +165,3 @@
         $.registerChatCommand('./custom/kentobotSystem.js', 'lurk');
     });
 })();
-
-

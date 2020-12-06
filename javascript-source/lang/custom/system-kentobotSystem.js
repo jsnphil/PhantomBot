@@ -33,3 +33,4 @@ $.lang.register('kentobot.mode.selection', 'Running in $1 mode');
 
 $.lang.register('kentobot.lurk.music', 'Sit back and enjoy the drumming! kentobDRUM kentobDRUM kentobDRUM');
 $.lang.register('kentobot.lurk.game', 'Grab a drink a enjoy the lurk kentobCHEERS');
+
