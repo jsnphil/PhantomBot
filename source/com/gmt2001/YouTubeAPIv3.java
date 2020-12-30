@@ -255,7 +255,7 @@ public class YouTubeAPIv3 {
 
                             com.gmt2001.Console.debug.println("Search API Success");
 
-                            return new String[] { videoId, snippet.getString("title"), snippet.getString("channelTitle")};
+                            return new String[] { videoId, snippet.getString("title"), snippet.getString("channelTitle"), snippet.getString("channelId")};
                         }
                     }
                     

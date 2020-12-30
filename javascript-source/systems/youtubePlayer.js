@@ -55,9 +55,8 @@
             connectedPlayerClient = null,
             /* @type {BotPlayList} */
             currentPlaylist = null,
-            shuffleBuffer = $.getSetIniDbNumber('shuffleSettings', 'songbuffer', 2);
-
-
+            shuffleBuffer = $.getSetIniDbNumber('shuffleSettings', 'songbuffer', 2),
+            restrictedMode = $.getSetIniDbBoolean('ytSettings', 'restrictedMode', false);
     /**
      * @function reloadyt
      */
@@ -333,10 +332,15 @@
                 throw 'No data returned.';
             }
 
-            $.log.file('youtube-player', data[0] + ", " + data[1] + ", " + data[2]);
+            $.log.file('youtube-player', data[0] + ", " + data[1] + ", " + data[2] + ", " + data[3]);
 
             videoId = data[0];
             videoTitle = data[1];
+            channelId = data[3];
+
+            if (restrictedMode && $.inidb.exists('ytplayer_allowedchannels', channelId)) {
+                throw "Song request is not from an allowed channel";
+            }
 
             if (videoTitle.equalsIgnoreCase('video marked private') || videoTitle.equalsIgnoreCase('no search results found')) {
                 throw videoTitle;
@@ -2478,6 +2482,27 @@
             connectedPlayerClient.pushSongList();
             connectedPlayerClient.pushQueueInformation();
         }
+
+        if (command.equalsIgnoreCase('restrictionmode')) {
+            if (args[0] == null) {
+                $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.restrictedmode.usage'));
+            } else {
+                if (args[0].equalsIgnoreCase("enable")) {
+                    restrictedMode = true;
+                    $.setIniDbBoolean('ytSettings', 'restrictedMode', true);
+                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.restrictedmode.status.' + restrictedMode));
+                } else if (args[0].equalsIgnoreCase("disable")) {
+                    restrictedMode = false;
+                    $.setIniDbBoolean('ytSettings', 'restrictedMode', false);
+                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.restrictedmode.status.' + restrictedMode));
+                } else if (args[0].equalsIgnoreCase('status')) {
+                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.restrictedmode.status.' + restrictedMode));
+                } else {
+                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.restrictedmode.usage'));
+                }
+            }
+
+        }
     });
 
     function isRequestAllowed(user, request) {
@@ -2647,6 +2672,10 @@
         $.registerChatSubcommand('edit', 'user', 2);
         $.registerChatCommand('./systems/youtubePlayer.js', "clearhistory", 2);
         $.registerChatCommand('./systems/youtubePlayer.js', "save", 2);
+
+        $.registerChatCommand('./systems/youtubePlayer.js', 'restrictionmode', 2);
+        $.registerChatSubcommand('restrictionmode', 'status', 2);
+
 
         // Initialize user request played counter
         // TODO Move to startstream, move to a local variable and out of the DB
