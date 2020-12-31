@@ -122,6 +122,11 @@
                 $.createNewSOTNPlaylist();
                 $.say($.lang.get('kentobot.startstream.sotn.playlist'));
 
+                // Load SOTN winner into pending bumps
+                // TODO Load SOTN winner into the pending bumps table - do not increment counts
+                $.loadSotnWinner();
+                $.say($.lang.get('kentobot.startstream.sotn.load'));
+
                 var connectedPlayerClient = $.getConnectedPlayerClient();
                 if (connectedPlayerClient) {
                     connectedPlayerClient.pushPlayList();

@@ -428,7 +428,12 @@
         }
 
         if (command.equalsIgnoreCase('resetbumps')) {
+            resetBumps();
+        }
 
+        if (command.equalsIgnoreCase('beanbump')) {
+            // TODO Check cooldown?
+            // TODO Call StreamElements with user and redemption ID
         }
     });
 
@@ -489,6 +494,26 @@
         autoBumpEnabled = true;
     }
 
+    function loadSotnWinner() {
+        var winners = $.inidb.GetKeyList('sotn_winners', '');
+        $.log.file('queue-management', '[loadSotnWinner] - Winners: ' + winners.join());
+
+        if (winners == null || winners.length == 0) {
+            $.log.file('queue-management', '[loadSotnWinner] - No winner to load, skipping');
+            return;
+        }
+
+        var winner = $.inidb.GetString('sotn_winners', '', winners[0]);
+        $.log.file('queue-management', '[loadSotnWinner] - Winner: ' + winners[0]);
+
+        var winnerJson = JSON.parse(winner);
+
+        addPendingBump(winnerJson.winner, 'sotn');
+
+        $.log.file('queue-management', '[loadSotnWinner] - Pending bump added, removing from SOTN table');
+        $.inidb.RemoveKey('sotn_winners', '', winners[0]);
+    }
+
     $.autoBump = autoBump;
     $.getBumpData = getBumpData;
     $.bumpMethod = bumpMethod;
@@ -508,6 +533,8 @@
     $.decrementBeanBump = decrementBeanBump;
     $.incrementBeanBump = incrementBeanBump;
     $.resetBeanBumps = resetBeanBumps;
+
+    $.loadSotnWinner = loadSotnWinner;
 
     /**
      * @event initReady
@@ -537,5 +564,6 @@
         $.registerChatCommand('./custom/queueManagementSystem.js', 'resetbumps', 2);
 
 
+        $.registerChatCommand('./custom/queueManagementSystem.js', 'beanbump', 7);
     });
 })();

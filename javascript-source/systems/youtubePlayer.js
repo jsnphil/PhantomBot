@@ -338,7 +338,10 @@
             videoTitle = data[1];
             channelId = data[3];
 
-            if (restrictedMode && $.inidb.exists('ytplayer_allowedchannels', channelId)) {
+            var channelAllowed = $.inidb.exists('ytplayer_allowedchannels', channelId);
+            $.log.file('youtube-player', "Restriction mode: " + restrictedMode + ", Allowed Channel: " + channelAllowed);
+
+            if (restrictedMode && !($.inidb.exists('ytplayer_allowedchannels', channelId))) {
                 throw "Song request is not from an allowed channel";
             }
 
