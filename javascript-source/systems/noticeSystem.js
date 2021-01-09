@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2020 phantom.bot
+ * Copyright (C) 2016-2021 phantombot.github.io/PhantomBot
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,17 +21,17 @@
  * Will say a message or a command every x amount of minutes.
  */
 
-(function () {
+(function() {
     var noticeReqMessages = $.getSetIniDbNumber('noticeSettings', 'reqmessages', 25),
-            noticeInterval = $.getSetIniDbNumber('noticeSettings', 'interval', 10),
-            noticeToggle = $.getSetIniDbBoolean('noticeSettings', 'noticetoggle', false),
-            numberOfNotices = (parseInt($.inidb.GetKeyList('notices', '').length) ? parseInt($.inidb.GetKeyList('notices', '').length) : 0),
-            noticeOffline = $.getSetIniDbBoolean('noticeSettings', 'noticeOfflineToggle', false),
-            isReloading = false,
-            messageCount = 0,
-            RandomNotice = 0,
-            lastNoticeSent = 0,
-            interval;
+        noticeInterval = $.getSetIniDbNumber('noticeSettings', 'interval', 10),
+        noticeToggle = $.getSetIniDbBoolean('noticeSettings', 'noticetoggle', false),
+        numberOfNotices = (parseInt($.inidb.GetKeyList('notices', '').length) ? parseInt($.inidb.GetKeyList('notices', '').length) : 0),
+        noticeOffline = $.getSetIniDbBoolean('noticeSettings', 'noticeOfflineToggle', false),
+        isReloading = false,
+        messageCount = 0,
+        RandomNotice = 0,
+        lastNoticeSent = 0,
+        interval;
 
     /**
      * @function reloadNotices
@@ -40,9 +40,9 @@
         if (!isReloading) {
             isReloading = true;
             var keys = $.inidb.GetKeyList('notices', ''),
-                    count = 0,
-                    temp = [],
-                    i;
+                count = 0,
+                temp = [],
+                i;
 
             for (i = 0; i < keys.length; i++) {
                 if ($.inidb.get('notices', keys[i]) != null) {
@@ -63,21 +63,17 @@
             }
             isReloading = false;
         }
-    }
-    ;
+    };
 
     /**
      * @function sendNotice
      */
     function sendNotice() {
         var EventBus = Packages.tv.phantombot.event.EventBus,
-                CommandEvent = Packages.tv.phantombot.event.command.CommandEvent,
-                start = RandomNotice,
-                notice = null,
-                mode = $.botMode();
-
-
-
+            CommandEvent = Packages.tv.phantombot.event.command.CommandEvent,
+            start = RandomNotice,
+            notice = null;
+                        
         do {
             notice = $.inidb.get('notices', 'message_' + RandomNotice);
 
@@ -86,7 +82,7 @@
             if (RandomNotice >= numberOfNotices) {
                 RandomNotice = 0;
             }
-
+            
             if (notice && notice.match(/\(gameonly=.*\)/g)) {
                 var game = notice.match(/\(gameonly=(.*)\)/)[1];
                 if ($.getGame($.channelName).equalsIgnoreCase(game)) {
@@ -95,7 +91,7 @@
                     notice = null;
                 }
             }
-        } while (!notice && start !== RandomNotice);
+        } while(!notice && start !== RandomNotice);
 
         if (notice == null) {
             return;
@@ -110,8 +106,7 @@
         } else {
             $.say(notice);
         }
-    }
-    ;
+    };
 
     /**
      * @function reloadNoticeSettings
@@ -121,26 +116,25 @@
         noticeToggle = $.getIniDbBoolean('noticeSettings', 'noticetoggle');
         noticeOffline = $.getIniDbBoolean('noticeSettings', 'noticeOfflineToggle');
         noticeInterval = $.getIniDbNumber('noticeSettings', 'interval');
-    }
-    ;
+    };
 
     /**
      * @event ircChannelMessage
      */
-    $.bind('ircChannelMessage', function (event) {
+    $.bind('ircChannelMessage', function(event) {
         messageCount++;
     });
 
     /**
      * @event command
      */
-    $.bind('command', function (event) {
+    $.bind('command', function(event) {
         var sender = event.getSender(),
-                command = event.getCommand(),
-                argsString = event.getArguments().trim(),
-                args = event.getArgs(),
-                action = args[0],
-                message = '';
+            command = event.getCommand(),
+            argsString = event.getArguments().trim(),
+            args = event.getArgs(),
+            action = args[0],
+            message = '';
 
         /**
          * @commandpath notice - Base command for managing notices
@@ -278,17 +272,17 @@
              * @commandpath notice interval [minutes] - Sets the notice interval in minutes
              */
             if (action.equalsIgnoreCase('interval')) {
-                if (args.length == 0) {
+                if (args.length < 2) {
                     $.say($.whisperPrefix(sender) + $.lang.get('noticehandler.notice-interval-usage'));
                     return;
-                } else if (parseInt(args[1]) < 5) {
+                } else if (isNaN(args[1]) || parseInt(args[1]) < 5) {
                     $.say($.whisperPrefix(sender) + $.lang.get('noticehandler.notice-interval-404'));
                     return;
                 } else {
-                    $.inidb.set('noticeSettings', 'interval', args[1]);
+                    $.inidb.set('noticeSettings', 'interval', parseInt(args[1]));
                     noticeInterval = parseInt(args[1]);
                     $.say($.whisperPrefix(sender) + $.lang.get('noticehandler.notice-inteval-success'));
-                    reloadNoticeSettings()
+                    reloadNoticeSettings();
                     return;
                 }
             }
@@ -349,7 +343,7 @@
     });
 
     // Set the interval to announce
-    interval = setInterval(function () {
+    interval = setInterval(function() {
         if (noticeToggle && $.bot.isModuleEnabled('./systems/noticeSystem.js') && numberOfNotices > 0) {
             if ((noticeReqMessages < 0 || messageCount >= noticeReqMessages) && (lastNoticeSent + (noticeInterval * 6e4)) <= $.systemTime()) {
                 if ((noticeOffline && !$.isOnline($.channelName)) || $.isOnline($.channelName)) {
@@ -364,7 +358,7 @@
     /**
      * @event initReady
      */
-    $.bind('initReady', function () {
+    $.bind('initReady', function() {
         $.registerChatCommand('./systems/noticeSystem.js', 'notice', 1);
     });
 

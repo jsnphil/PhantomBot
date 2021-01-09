@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2020 phantom.bot
+ * Copyright (C) 2016-2021 phantombot.github.io/PhantomBot
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -142,3 +142,4 @@ $.lang.register('ytplayer.command.votecount.usage', '!ytp votecount [amount]  --
 $.lang.register('ytplayer.restrictedmode.usage', 'Usage !restrictionmode [enable|disable]');
 $.lang.register('ytplayer.restrictedmode.status.true', 'Song request restrictions are enabled');
 $.lang.register('ytplayer.restrictedmode.status.false', 'Song request restrictions are disabled');
+
