@@ -265,6 +265,8 @@
     $.bind('ircChannelMessage', function (event) {
         if (status === true && event.getMessage().equalsIgnoreCase(keyword)) {
             enter(event.getSender(), event.getTags());
+        } else {
+                $.say($.whisperPrefix(event.getSender()) + $.lang.get('shufflesystem.no.active.shuffle'));
         }
     });
 
