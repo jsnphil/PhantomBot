@@ -168,5 +168,8 @@
         $.registerChatCommand('./custom/kentobotSystem.js', 'mode?', 2);
 
         $.registerChatCommand('./custom/kentobotSystem.js', 'lurk');
+
+        // Ensure the tables used by the UI pages are available, even if we haven't added data yet
+        $.inidb.AddFile("sotn_winners");
     });
 })();

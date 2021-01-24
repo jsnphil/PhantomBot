@@ -28,6 +28,7 @@
     <property name="version" value="3.4.0" />
     <!-- Please see this for version numbers: https://semver.org/ -->
     <property name="webpanel.version" value="1.4.0" />
+    <property name="kentobot.version" value="6.0.0" />
     <property name="src" location="source" />
     <property name="reference" location="lib" />
     <property name="build" location="build" />
@@ -216,6 +217,10 @@
             file="source/tv/phantombot/RepoVersion.java"
             match="panelVersion = &quot;(.*)&quot;;"
             replace="panelVersion = &quot;@webpanel.version@&quot;;" />
+        <replaceregexp
+            file="source/tv/phantombot/RepoVersion.java"
+            match="kentobotVersion = &quot;(.*)&quot;;"
+            replace="kentobotVersion = &quot;@kentobot.version@&quot;;" />
     </target>
 
     <target depends="compile.src,post.compile,git.revision" name="jar">

@@ -230,6 +230,9 @@ public class WsYTHandler implements WsFrameHandler {
                 EventBus.instance().postAsync(new YTPlayerStateEvent(YTPlayerState.NEWPAUSE));
             } else if (jsonStatus.has("currentid")) {
                 String dataString = jsonStatus.getString("currentid");
+                com.gmt2001.Console.err.println(dataString);
+                com.gmt2001.Console.debug.println(dataString);
+
                 EventBus.instance().postAsync(new YTPlayerCurrentIdEvent(dataString));
             } else if (jsonStatus.has("volume")) {
                 dataInt = jsonStatus.getInt("volume");

@@ -36,6 +36,7 @@ $(function () {
         }
 
         try {
+            console.debug(data);
             socket.send(JSON.stringify(data));
         } catch (ex) {
             console.error('Failed to send message to socket: ' + ex.message);

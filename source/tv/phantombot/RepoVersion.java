@@ -22,6 +22,7 @@ public class RepoVersion {
     private static final String repoVersion = "@repository.version@";
     private static final String buildType = "@buildtype@";
     private static final String panelVersion = "@webpanel.version@";
+    private static final String kentobotVersion = "@kentobot.version@";
 
     private RepoVersion() {
     }
@@ -48,5 +49,9 @@ public class RepoVersion {
 
     public static String getPanelVersion() {
         return panelVersion;
+    }
+    
+    public static String getKentobotVersion() {
+        return kentobotVersion;
     }
 }

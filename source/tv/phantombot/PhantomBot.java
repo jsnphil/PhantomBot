@@ -254,6 +254,10 @@ public final class PhantomBot implements Listener {
     public String botRevision() {
         return "Build Revision: " + repoVersion();
     }
+    
+    public String kentobotVersion() {
+        return "Kentobot Version: " + RepoVersion.getKentobotVersion();
+    }
 
     /**
      * Only used on bot boot up for now.

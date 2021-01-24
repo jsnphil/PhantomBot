@@ -2683,5 +2683,9 @@
         // Initialize user request played counter
         // TODO Move to startstream, move to a local variable and out of the DB
         $.inidb.RemoveFile("songcounts");
+
+        // Ensure the tables used by the UI pages are available, even if we haven't added data yet
+        $.inidb.AddFile("ytplayer_allowedchannels");
+        $.inidb.AddFile("sotn_winners");
     });
 })();
