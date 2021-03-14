@@ -2672,7 +2672,7 @@
             req.setShuffleEntered(false);
          }
     }
-    
+
     function resetShuffleBetweenBumpData() {
         songsSinceLastShuffle = 0;
         mixInShuffleFlag = false;
