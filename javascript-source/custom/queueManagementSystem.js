@@ -227,10 +227,9 @@
 
             var requestsList = $.currentPlaylist().getRequestList();
 
-            if (userToBump.startsWith("@")) {
-                userToBump = userToBump.substring(1, userToBump.length());
-            }
-
+            
+            userToBump = $.user.sanitize(userToBump);
+            
             $.log.file('queue-management', '[bumpCmd] - Requesting bumping user ' + userToBump + ' to position ' + bumpPosition);
 
             if (requestsList.length == 0) {
@@ -382,8 +381,8 @@
                 if (pendingBump != null) {
                     removePendingBump(args[0]);
 
-                    bumpRecipientRequest[0].setBumpFlag();
                     $.currentPlaylist().addToQueue(bumpRecipientRequest[0], $.getBumpPosition());
+                    bumpRecipientRequest[0].setBumpFlag();
 
                     $.getConnectedPlayerClient().pushSongList();
 
@@ -447,6 +446,9 @@
 
             if (beanBumpsRemaining == 0) {
                 $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.beanbumps.soldout'));
+                
+                // Phantombot already took the points to run the command, so refund them
+                $.inidb.incr('points', $.user.sanitize(sender), 300);
                 return;
             }
 
@@ -457,14 +459,16 @@
 
             var request = $.getUserRequest(sender);
             if (request != null) {
-                request[0].setBumpFlag();
                 var bumpPosition = $.getBumpPosition();
+                request[0].setBumpFlag();
                 $.currentPlaylist().addToQueue(request[0], bumpPosition);
                 $.getConnectedPlayerClient().pushSongList();
                 $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.command.bump.success', bumpPosition + 1));
 
-                markFreeBumpUsed(sender)
+                markFreeBumpUsed(sender);
                 decrementBeanBump();
+                
+                $.getConnectedPlayerClient().pushQueueInformation();
             } else {
                 $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.beanbumps.song.404'));
             }

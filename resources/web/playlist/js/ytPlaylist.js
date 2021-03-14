@@ -171,6 +171,7 @@ function handleSongList(d) {
         var duration = d['songlist'][i]['duration'];
         var requester = d['songlist'][i]['requester'];
         var shuffle = d['songlist'][i]['shuffle'];
+        var shuffleEntered = d['songlist'][i]['shuffleEntered'];
         tableData += '<a href="https://youtu.be/' + id + '" target="_blank">';
 
         tableData += '<div class="dataRow">';
@@ -183,8 +184,11 @@ function handleSongList(d) {
             tableData += '<div class="data dataQueuePosition"> #' + playerIndex;
             tableData += ' <i class="fas fa-star"></i>';
         } else if (shuffle == "true") {
-            tableData += '<div class="data dataQueuePosition"> #' + playerIndex
+            tableData += '<div class="data dataQueuePosition"> #' + playerIndex;
             tableData += ' <i class="fas fa-dice"></i>';
+        } else if (shuffleEntered == "true") {
+            tableData += '<div class="data dataQueuePosition">' ;
+            tableData += '<i class="fas fa-ticket-alt"></i>';
         } else if (shuffleEnabled) {
             tableData += '<div class="data dataQueuePosition">';
         } else {

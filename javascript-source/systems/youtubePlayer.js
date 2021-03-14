@@ -151,7 +151,8 @@
                 license = 0,
                 embeddable = 0,
                 bumped = false,
-                shuffle = false;
+                shuffle = false,
+                shuffleEntered = false;
 
         this.found = false;
 
@@ -189,6 +190,14 @@
 
         this.isShuffle = function () {
             return shuffle;
+        };
+        
+        this.isShuffleEntered = function () {
+            return shuffleEntered;
+        };
+        
+        this.setShuffleEntered = function (entered) {
+          shuffleEntered = entered;  
         };
 
         /**
@@ -1166,7 +1175,8 @@
                         "duration": youtubeObject.getVideoLengthMMSS() + '',
                         "requester": youtubeObject.getOwner() + '',
                         "bump": youtubeObject.isBump() + '',
-                        "shuffle": youtubeObject.isShuffle() + ''
+                        "shuffle": youtubeObject.isShuffle() + '',
+                        "shuffleEntered": youtubeObject.isShuffleEntered() + ''
                     });
                 }
                 client.sendJSONToAll(JSON.stringify(jsonList));
@@ -2543,11 +2553,15 @@
 
     function getUserRequest(user) {
         $.log.file('queue-management', 'Looking for request for user [' + user + ']');
+        
 
         var timeToPlayInSeconds = 0;
         var request;
         var requests = currentPlaylist.getRequestList();
-        for (i = 0; i < requests.length; i++) {
+        
+        $.log.file('queue-management', 'Queue size [' + requests.length + ']');
+        
+        for (var i = 0; i < requests.length; i++) {
             request = requests[i];
 
             $.log.file('queue-management', 'Request [' + i + '] owner [' + request.getOwner() + '], Given user [' + user + ']');
@@ -2602,20 +2616,26 @@
     }
 
     function getBumpPosition() {
-        var bumpPosition = 0;
-        var i;
+        $.log.file('queue-management', 'Checking for bump position');
+        $.log.file('queue-management', 'Number of requests: ' + currentPlaylist.getRequestsCount());
 
-        for (i = 0; i < currentPlaylist.getRequestsCount(); i++) {
+        for (var i = 0; i < currentPlaylist.getRequestsCount(); i++) {
+            $.log.file('queue-management', 'Checking request at position ' + i);
+            
             req = currentPlaylist.getRequestAtIndex(i);
-            if (!req.isBump() && !req.isShuffle()) {
-                bumpPosition = i;
-                break;
+            $.log.file('queue-management', 'Request [' + req.getOwner() + '] flags: Bump - ' + req.isBump() + ', Shuffle - ' + req.isShuffle());
+
+            if (req.isBump() || req.isShuffle()) {
+                $.log.file('queue-management', 'Request is a bump or a shuffle, continuing');
+                continue;
+            } else {
+                $.log.file('queue-management', 'Request is not a bump and request is not a shuffle, returning position ' + i);
+                return i;
             }
         }
 
-        $.log.file('queue-management', 'Position in the queue to bump to: ' + bumpPosition);
-
-        return bumpPosition;
+        $.log.file('queue-management', 'No bumps or shuffles in the queue, bumping postion to top');
+        return 0;
     }
 
     function clearSongHistory() {
@@ -2634,6 +2654,13 @@
         currentPlaylist.loadNewPlaylist(playlistName);
         loadPanelPlaylist();
     }
+    
+    function clearShuffleEnteredFlags() {
+         for (var i = 0; i < currentPlaylist.getRequestsCount(); i++) {
+            var req = currentPlaylist.getRequestAtIndex(i);
+            req.setShuffleEntered(false);
+         }
+    }
 
     $.getSongQueue = getSongQueue;
     $.getUserRequest = getUserRequest;
@@ -2645,6 +2672,7 @@
     $.clearSongHistory = clearSongHistory;
     $.enableSongRequests = enableSongRequests;
     $.createNewSOTNPlaylist = createNewSOTNPlaylist;
+    $.clearShuffleEnteredFlags = clearShuffleEnteredFlags;
 
     $.bind('initReady', function () {
         $.registerChatCommand('./systems/youtubePlayer.js', 'ytp', 2);
