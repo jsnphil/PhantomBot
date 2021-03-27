@@ -220,7 +220,7 @@ public class YouTubeAPIv3 {
             com.gmt2001.Console.debug.println("Query: " + q);
 
              String youtubeEndpoint = "https://www.googleapis.com/youtube/v3/videos?" +
-                    "id=" + escapedQuery + 
+                    "id=" + q + 
                     "&key=" + apikey + 
                     "&part=snippet" +
                     "&regionCode=US";
