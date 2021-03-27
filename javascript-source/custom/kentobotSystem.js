@@ -26,7 +26,8 @@
     var startMessages = [
         "Flux capacitor, fluxing",
         "Hyperdrive engaged",
-        "S-foils locked in attack position"
+        "S-foils locked in attack position",
+        "Weapons systems ready"
     ];
 
     function secondsToTimestamp(timeInSeconds) {

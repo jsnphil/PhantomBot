@@ -61,3 +61,6 @@ $.lang.register('songqueuemgmt.autobump.disabled', 'Autobumping has been disable
 $.lang.register('songqueuemgmt.beanbumps.soldout', 'Bean bumps are sold out');
 $.lang.register('songqueuemgmt.beanbumps.free.bump.used', 'You have already used your free bump for this stream');
 $.lang.register('songqueuemgmt.beanbumps.song.404', 'You do not have a song in the queue');
+$.lang.register('songqueuemgmt.beanbumps.cooldown.usage', 'Usage: !beanbump cooldown <seconds>');
+$.lang.register('songqueuemgmt.beanbumps.cooldown.set', 'Beanbump cooldown set to $1 seconds');
+$.lang.register('songqueuemgmt.beanbumps.cooldown.user.set', 'You have already used your free bump for this period.  You will be able to redeem again after $1');
