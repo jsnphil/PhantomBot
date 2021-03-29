@@ -190,6 +190,24 @@
         $.log.file('queue-management', 'Clearing bits counts');
         $.inidb.RemoveFile('bumpSystem_bitsCounts');
         $.inidb.AddFile("bumpSystem_bitsCounts");
+        
+        clearExpiredBumpCooldowns();
+    }
+    
+    function clearExpiredBumpCooldowns() {
+        $.log.file('queue-management', 'Clearing expired bump cooldowns');
+        
+        var users = $.inidb.GetKeyList('bumpSystem_beanbumpUserCooldowns', '');
+        
+        for (var i = 0; i < users.length; i++) {
+            $.consoleDebug("Checking cooldown timestamp for " + users[i]);
+            var userCooldownTime = $.getSetIniDbNumber('bumpSystem_beanbumpUserCooldowns', $.user.sanitize(users[i]), 0);
+            
+            if ($.systemTime() > userCooldownTime) {
+                $.consoleDebug("Cooldown for " + users[i] + " has expired, deleting");
+                $.inidb.del('bumpSystem_beanbumpUserCooldowns', $.user.sanitize(users[i]));
+            }
+        }
     }
 
     $.bind('command', function (event) {
@@ -439,12 +457,35 @@
         }
 
         if (command.equalsIgnoreCase('beanbump')) {
+            if (args[0] && args[0].equalsIgnoreCase("cooldown")) {
+                if (isNaN(parseInt(args[1]))) {
+                    $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.beanbumps.cooldown.usage'));
+                } else {
+                    $.inidb.set("bumpSystem_beanbumpConfig", "cooldown", args[1]);
+                    $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.beanbumps.cooldown.set', args[1]));
+                }
+                return;
+            }
+            
             if (!($.botMode().equalsIgnoreCase("music")) || !autoBumpEnabled) {
                 // Not in music mode, exiting
                 return;
             }
+            
+            // Check cooldown value for user
+            var userCooldownTime = $.getSetIniDbNumber('bumpSystem_beanbumpUserCooldowns', $.user.sanitize(sender), 0);
 
-            if (beanBumpsRemaining == 0) {
+            if ($.systemTime() < userCooldownTime) {
+                var cooldownExpiration = new Date(userCooldownTime);
+                var cooldownDate = cooldownExpiration.getMonth() + 1 + "/" + cooldownExpiration.getDate() + "/" + cooldownExpiration.getFullYear();
+                $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.beanbumps.cooldown.user.set', cooldownDate));
+                
+                // Phantombot already took the points to run the command, so refund them
+                $.inidb.incr('points', $.user.sanitize(sender), 300);
+                return;
+            }
+
+            if (beanBumpsRemaining === 0) {
                 $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.beanbumps.soldout'));
                 
                 // Phantombot already took the points to run the command, so refund them
@@ -452,12 +493,12 @@
                 return;
             }
 
-            if (getFreeBumpUsed(sender)) {
+            if (getFreeBumpUsed($.user.sanitize(sender))) {
                 $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.beanbumps.free.bump.used'));
                 return;
             }
 
-            var request = $.getUserRequest(sender);
+            var request = $.getUserRequest($.user.sanitize(sender));
             if (request != null) {
                 var bumpPosition = $.getBumpPosition();
                 request[0].setBumpFlag();
@@ -465,10 +506,19 @@
                 $.getConnectedPlayerClient().pushSongList();
                 $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.command.bump.success', bumpPosition + 1));
 
-                markFreeBumpUsed(sender);
+                markFreeBumpUsed($.user.sanitize(sender));
                 decrementBeanBump();
                 
                 $.getConnectedPlayerClient().pushQueueInformation();
+                
+                // TODO Store cooldown info for user
+                var cooldownLength = $.inidb.get("bumpSystem_beanbumpConfig", "cooldown");
+                $.consoleDebug("Cooldown length" + cooldownLength);
+                
+                var userCooldown = (cooldownLength * 1000) + $.systemTime();
+                $.consoleDebug("Setting user cooldown for " + $.user.sanitize(sender) + " to " + userCooldown);
+
+                $.inidb.set("bumpSystem_beanbumpUserCooldowns", $.user.sanitize(sender), userCooldown);
             } else {
                 $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.beanbumps.song.404'));
             }
@@ -604,5 +654,6 @@
 
 
         $.registerChatCommand('./custom/queueManagementSystem.js', 'beanbump', 7);
+        $.registerChatSubcommand('beanbump', 'cooldown', 2);
     });
 })();

@@ -227,9 +227,6 @@
             message(username, $.lang.get('shufflesystem.error.bump'));
             return;
         }
-        
-        request[0].setShuffleEntered(true);
-        $.getConnectedPlayerClient().pushSongList();
 
         /* Check if the user is one of the last 2 winners */
         var recentUsers = $.currentPlaylist().getPreviousRequesters();
@@ -240,20 +237,16 @@
                 return;
             }
         }
+        
+        /* Update the playlist page to show the ticket icon */
+        request[0].setShuffleEntered(true);
+        $.getConnectedPlayerClient().pushSongList();
 
         /* Push the user into the array */
         entered[username] = true;
         entries.push(username);
 
         message(username, $.lang.get('shufflesystem.enter.success'));
-
-//        /* Push the panel stats */
-//        if ($.bot.isModuleEnabled('./handlers/panelHandler.js')) {
-//            $.inidb.setAutoCommit(false);
-//            $.inidb.set('raffleList', username, true);
-//            $.inidb.set('raffleresults', 'raffleEntries', Object.keys(entered).length);
-//            $.inidb.setAutoCommit(true);
-//        }
     }
 
     /**

@@ -1298,11 +1298,12 @@
             if (songsSinceLastShuffle >= 5 || mixInShuffleFlag) {
                 mixInShuffleFlag = true;
                 $.say($.whisperPrefix("Kentobeans7") + $.lang.get('ytplayer.bump.shuffle.mix', songsSinceLastShuffle));
-            } else {
-                if (youtubeVideo.isBump()) {
-                    songsSinceLastShuffle++;
-                }
             }
+            
+            if (youtubeVideo.isBump()) {
+                songsSinceLastShuffle++;
+            }
+            
 
             client.play(youtubeVideo.getVideoId(), youtubeVideo.getVideoTitle(), youtubeVideo.getVideoLengthMMSS(), youtubeVideo.getOwner());
         };
@@ -2565,6 +2566,7 @@
     function getUserRequest(user) {
         $.log.file('queue-management', 'Looking for request for user [' + user + ']');
         
+        user = $.user.sanitize(user);
 
         var timeToPlayInSeconds = 0;
         var request;
