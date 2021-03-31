@@ -472,6 +472,22 @@
                 return;
             }
             
+            if (beanBumpsRemaining === 0) {
+                $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.beanbumps.soldout'));
+                
+                // Phantombot already took the points to run the command, so refund them
+                $.inidb.incr('points', $.user.sanitize(sender), 300);
+                return;
+            }
+            
+              if (getFreeBumpUsed($.user.sanitize(sender))) {
+                $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.beanbumps.free.bump.used'));
+                
+                 // Phantombot already took the points to run the command, so refund them
+                $.inidb.incr('points', $.user.sanitize(sender), 300);
+                return;
+            }
+            
             // Check cooldown value for user
             var userCooldownTime = $.getSetIniDbNumber('bumpSystem_beanbumpUserCooldowns', $.user.sanitize(sender), 0);
 
@@ -482,19 +498,6 @@
                 
                 // Phantombot already took the points to run the command, so refund them
                 $.inidb.incr('points', $.user.sanitize(sender), 300);
-                return;
-            }
-
-            if (beanBumpsRemaining === 0) {
-                $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.beanbumps.soldout'));
-                
-                // Phantombot already took the points to run the command, so refund them
-                $.inidb.incr('points', $.user.sanitize(sender), 300);
-                return;
-            }
-
-            if (getFreeBumpUsed($.user.sanitize(sender))) {
-                $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.beanbumps.free.bump.used'));
                 return;
             }
 
@@ -521,6 +524,8 @@
                 $.inidb.set("bumpSystem_beanbumpUserCooldowns", $.user.sanitize(sender), userCooldown);
             } else {
                 $.say($.whisperPrefix(sender) + $.lang.get('songqueuemgmt.beanbumps.song.404'));
+                // Phantombot already took the points to run the command, so refund them
+                $.inidb.incr('points', $.user.sanitize(sender), 300);
             }
         }
     });
